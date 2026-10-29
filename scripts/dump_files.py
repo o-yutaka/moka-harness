@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """File-granular code dump (GitHub Actions lane).
 Usage: python3 scripts/dump_files.py "<group>;;<group>;;..."
-  group = "<git repo URL>" or "<git repo URL>|<glob>|<glob>|..."
+group = "<git repo URL>" or "<git repo URL>|<glob>|<glob>|..."
 Clones each repo (depth 1), copies every file matching any glob (or all files
 if no glob given) into outputs/files/<repo>/<relative path>, and writes
 outputs/INDEX.txt with per-file size + sha256. Each file stays individually
@@ -18,7 +18,7 @@ def sha256(p):
 
 def main():
     spec = sys.argv[1] if len(sys.argv) > 1 else ""
-    groups = [g.strip() for g in spec.split(";;") if g.strip()]
+    groups = [g.strip() for g in spec.split(",,") if g.strip()]
     if not groups:
         print("NO SPEC"); return
     os.makedirs("outputs/files", exist_ok=True)
