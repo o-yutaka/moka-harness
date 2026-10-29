@@ -31,6 +31,7 @@ jobs:
           MT_KEY_B: ${{ secrets.MT_KEY_B }}
           MT_IA_B: ${{ vars.MT_IA_B }}
           MT_CP_A: ${{ vars.MT_CP_A }}
+          AIVEN_TOKEN_1: ${{ secrets.AIVEN_TOKEN_1 }}
         run: |
           mkdir -p outputs
           python "scripts/${{ inputs.script }}.py" ${{ inputs.args }} 2>&1 | tee "outputs/${{ inputs.script }}.log"
