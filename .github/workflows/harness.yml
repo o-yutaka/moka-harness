@@ -3,31 +3,40 @@ on:
   workflow_dispatch:
     inputs:
       script:
-        description: "Script name under scripts/ (without .py)"
+        description: "script name under scripts/ (without .py)"
         required: true
         default: "env_report"
+      args:
+        description: "extra args for the script"
+        required: false
+        default: ""
   push:
-    branches: [main]
-    paths: ["scripts/**", ".github/workflows/harness.yml"]
+    paths:
+      - "scripts/**"
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: Install deps
-        run: pip install -q requests
+        run: pip install --quiet requests
       - name: Run script
         env:
-          HARNESS_SCRIPT: ${{ inputs.script || 'env_report' }}
+          MT_ORG_A: ${{ secrets.MT_ORG_A }}
+          MT_KEY_A: ${{ secrets.MT_KEY_A }}
+          MT_ORG_B: ${{ secrets.MT_ORG_B }}
+          MT_KEY_B: ${{ secrets.MT_KEY_B }}
+          MT_IA_B: ${{ vars.MT_IA_B }}
+          MT_CP_A: ${{ vars.MT_CP_A }}
         run: |
           mkdir -p outputs
-          python "scripts/${HARNESS_SCRIPT}.py" 2>&1 | tee outputs/run.log
-      - uses: actions/upload-artifact@v4
+          python "scripts/${{ inputs.script }}.py" ${{ inputs.args }} 2>&1 | tee "outputs/${{ inputs.script }}.log"
+      - name: Upload outputs
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: outputs
+          name: outputs-${{ github.run_id }}
           path: outputs/
