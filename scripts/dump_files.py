@@ -37,10 +37,13 @@ def main():
                 rel = os.path.relpath(full, dest)
                 if globs and not any(fnmatch.fnmatch(rel, g) or fnmatch.fnmatch(fn, g) for g in globs):
                     continue
-                out = os.path.join("outputs/files", name, rel)
+                safe_rel = rel
+                for ch in '":<>|*?':
+                    safe_rel = safe_rel.replace(ch, "_")
+                out = os.path.join("outputs/files", name, safe_rel)
                 os.makedirs(os.path.dirname(out), exist_ok=True)
                 shutil.copy2(full, out)
-                index.append((f"{name}/{rel}", os.path.getsize(full), sha256(full)))
+                index.append((f"{name}/{safe_rel}", os.path.getsize(full), sha256(full)))
     with open("outputs/INDEX.txt", "w") as f:
         for rel, size, digest in sorted(index):
             f.write(f"{size}\t{digest}\t{rel}\n")
