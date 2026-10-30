@@ -27,6 +27,7 @@ jobs:
         env:
           MT_ORG_A: ${{ secrets.MT_ORG_A }}
           MT_KEY_A: ${{ secrets.MT_KEY_A }}
+          MT_KEY_A_RO: ${{ secrets.MT_KEY_A_RO }}
           MT_ORG_B: ${{ secrets.MT_ORG_B }}
           MT_KEY_B: ${{ secrets.MT_KEY_B }}
           MT_IA_B: ${{ vars.MT_IA_B }}
