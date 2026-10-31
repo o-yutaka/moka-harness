@@ -35,6 +35,8 @@ jobs:
           AIVEN_TOKEN_1: ${{ secrets.AIVEN_TOKEN_1 }}
           AIVEN_TOKEN_2: ${{ secrets.AIVEN_TOKEN_2 }}
           OP_SA_TOKEN: ${{ secrets.OP_SA_TOKEN }}
+          TFH_KEY_1: ${{ secrets.TFH_KEY_1 }}
+          TFH_KEY_2: ${{ secrets.TFH_KEY_2 }}
         run: |
           mkdir -p outputs
           python "scripts/${{ inputs.script }}.py" ${{ inputs.args }} 2>&1 | tee "outputs/${{ inputs.script }}.log"
