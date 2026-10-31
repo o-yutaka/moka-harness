@@ -15,6 +15,9 @@ RESULTS = []
 
 def call(label, method, path, key, body=None):
     req = urllib.request.Request(BASE + path, method=method)
+    req.add_header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36")
+    req.add_header("Accept", "application/json, text/plain, */*")
+    req.add_header("Accept-Language", "en-US,en;q=0.9")
     if key:
         req.add_header("Authorization", "Bearer " + key)
     data = None
