@@ -38,7 +38,7 @@ def call(label, method, path, key, body=None):
     RESULTS.append({"label": label, "status": status, "body": text[:2000]})
     print(f"[{label}] HTTP {status} :: {snippet}", flush=True)
 
-NOTIF = lambda app: {"app_id": app, "wallet_addresses": [], "title": "probe", "message": "probe"}
+NOTIF = lambda app: {"app_id": app, "wallet_addresses": ["0x0000000000000000000000000000000000000001"], "title": "probe", "message": "probe", "mini_app_path": f"worldapp://mini-app?app_id={app}"}
 ACTION = {"name": "probe-action", "action_description": "probe"}
 
 call("M1 key1->app1 (control)", "GET", f"/api/v2/minikit/app-metadata/{APP1}", KEY1)
@@ -52,10 +52,10 @@ call("N2 key1 notify app2 (CROSS)", "POST", "/api/v2/minikit/send-notification",
 call("N3 key2 notify app1 (CROSS)", "POST", "/api/v2/minikit/send-notification", KEY2, NOTIF(APP1))
 call("N4 key1 notify appX", "POST", "/api/v2/minikit/send-notification", KEY1, NOTIF(APPX))
 
-call("A1 key1 action app1 (control)", "POST", f"/api/v2/create-action?app_id={APP1}", KEY1, dict(ACTION))
-call("A2 key1 action app2 (CROSS)", "POST", f"/api/v2/create-action?app_id={APP2}", KEY1, dict(ACTION))
-call("A3 key2 action app1 (CROSS)", "POST", f"/api/v2/create-action?app_id={APP1}", KEY2, dict(ACTION))
-call("A4 key1 action appX", "POST", f"/api/v2/create-action?app_id={APPX}", KEY1, dict(ACTION))
+call("A1 key1 action app1 (control)", "POST", f"/api/v2/create-action/{APP1}", KEY1, dict(ACTION))
+call("A2 key1 action app2 (CROSS)", "POST", f"/api/v2/create-action/{APP2}", KEY1, dict(ACTION))
+call("A3 key2 action app1 (CROSS)", "POST", f"/api/v2/create-action/{APP1}", KEY2, dict(ACTION))
+call("A4 key1 action appX", "POST", f"/api/v2/create-action/{APPX}", KEY1, dict(ACTION))
 
 out = pathlib.Path("outputs")
 out.mkdir(exist_ok=True)
