@@ -37,6 +37,9 @@ jobs:
           OP_SA_TOKEN: ${{ secrets.OP_SA_TOKEN }}
           TFH_KEY_1: ${{ secrets.TFH_KEY_1 }}
           TFH_KEY_2: ${{ secrets.TFH_KEY_2 }}
+          LD_PAT_A_ADMIN: ${{ secrets.LD_PAT_A_ADMIN }}
+          LD_PAT_A_READER: ${{ secrets.LD_PAT_A_READER }}
+          LD_PAT_B: ${{ secrets.LD_PAT_B }}
         run: |
           mkdir -p outputs
           python "scripts/${{ inputs.script }}.py" ${{ inputs.args }} 2>&1 | tee "outputs/${{ inputs.script }}.log"
