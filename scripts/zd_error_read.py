@@ -1,11 +1,12 @@
-import io, json, os, urllib.request, zipfile
+import io, json, os, zipfile
+import requests
 
 ARTIFACT_ID = 13359936146
 URL = f"https://api.github.com/repos/o-yutaka/moka-harness/actions/artifacts/{ARTIFACT_ID}/zip"
-req = urllib.request.Request(URL, headers={"Authorization": f"Bearer {os.environ.get('GITHUB_TOKEN', '')}", "Accept": "application/vnd.github+json", "User-Agent": "moka-harness"})
-with urllib.request.urlopen(req) as resp:
-    data = resp.read()
-z = zipfile.ZipFile(io.BytesIO(data))
+resp = requests.get(URL, headers={"Authorization": f"Bearer {os.environ.get('GITHUB_TOKEN', '')}", "Accept": "application/vnd.github+json", "User-Agent": "moka-harness"}, timeout=60)
+print('[ARTIFACT] status=' + str(resp.status_code))
+resp.raise_for_status()
+z = zipfile.ZipFile(io.BytesIO(resp.content))
 names = z.namelist()
 print('[ARTIFACT] names=' + str(names))
 target = next((n for n in names if n.endswith('exchange-error.json')), None)
