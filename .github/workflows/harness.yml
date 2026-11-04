@@ -45,6 +45,7 @@ jobs:
           ZD_AUTH_CODE: ${{ secrets.ZD_AUTH_CODE }}
           ZD_CLIENT_ID: ${{ secrets.ZD_CLIENT_ID }}
           ZD_CLIENT_SECRET: ${{ secrets.ZD_CLIENT_SECRET }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p outputs
           python "scripts/${{ inputs.script }}.py" ${{ inputs.args }} 2>&1 | tee "outputs/${{ inputs.script }}.log"
