@@ -40,6 +40,8 @@ jobs:
           LD_PAT_A_ADMIN: ${{ secrets.LD_PAT_A_ADMIN }}
           LD_PAT_A_READER: ${{ secrets.LD_PAT_A_READER }}
           LD_PAT_B: ${{ secrets.LD_PAT_B }}
+          KLAVIYO_KEY_X: ${{ secrets.KLAVIYO_KEY_X }}
+          KLAVIYO_KEY_Y: ${{ secrets.KLAVIYO_KEY_Y }}
         run: |
           mkdir -p outputs
           python "scripts/${{ inputs.script }}.py" ${{ inputs.args }} 2>&1 | tee "outputs/${{ inputs.script }}.log"
