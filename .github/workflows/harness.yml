@@ -42,6 +42,9 @@ jobs:
           LD_PAT_B: ${{ secrets.LD_PAT_B }}
           KLAVIYO_KEY_X: ${{ secrets.KLAVIYO_KEY_X }}
           KLAVIYO_KEY_Y: ${{ secrets.KLAVIYO_KEY_Y }}
+          ZD_AUTH_CODE: ${{ secrets.ZD_AUTH_CODE }}
+          ZD_CLIENT_ID: ${{ secrets.ZD_CLIENT_ID }}
+          ZD_CLIENT_SECRET: ${{ secrets.ZD_CLIENT_SECRET }}
         run: |
           mkdir -p outputs
           python "scripts/${{ inputs.script }}.py" ${{ inputs.args }} 2>&1 | tee "outputs/${{ inputs.script }}.log"
