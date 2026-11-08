@@ -112,6 +112,24 @@ def keys_ready(key_x, key_y):
 # ------------------------------------------------------------- REST raw -----
 
 def rest(method, path, key, body=None, revision=None, timeout=60):
+    # Klaviyo burst-throttles (429 "Expected available in N second",
+    # measured 2026-11-09 run #606: a 1s throttle aborted Step 0 key
+    # discrimination). Retry 429s with the server-stated wait.
+    attempt = 0
+    while True:
+        status, js, raw = _rest_once(method, path, key, body, revision,
+                                     timeout)
+        if status != 429 or attempt >= 4:
+            return status, js, raw
+        wait = 2.0 * (attempt + 1)
+        m = re.search(r"available in (\d+(?:\.\d+)?) second", raw or "")
+        if m:
+            wait = min(float(m.group(1)) + 0.5, 20.0)
+        time.sleep(wait)
+        attempt += 1
+
+
+def _rest_once(method, path, key, body=None, revision=None, timeout=60):
     url = API_BASE + path
     data = json.dumps(body).encode() if body is not None else None
     req = urllib.request.Request(url, data=data, method=method)
