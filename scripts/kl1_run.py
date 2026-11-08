@@ -414,15 +414,70 @@ def ag_legs(rest_fn, ro_key, full_key, run, seed):
             run.save("ag2_first_shape.json", shape_of(items[0]))
 
     # AG-3 creation probe (FULL key). This is the Free-plan gate test.
+    # Run #612 measured: the endpoint EXISTS and field-validates — the
+    # empty body got 400 "'mode' is a required field" (not a plan gate,
+    # not 404). So creation is probed ADAPTIVELY: supply candidate
+    # values for each required field the API names, following its
+    # source pointers, bounded to 16 POSTs, every body saved.
     create_path, create_rev = working if working else AGENT_PATHS[0]
-    body = {"data": {"type": "customer-agent-conversation",
-                     "attributes": {}}}
-    st, js, raw = rest_fn("POST", create_path, full_key, body,
-                          revision=create_rev)
-    run.save("ag3_create.txt", raw)
+    mode_candidates = ["web", "chat", "ai", "automated", "live_chat",
+                       "email", "sms", "whatsapp", "async", "sync",
+                       "test", "human"]
+    vid0 = seed["profiles"]["V"]["id"]
+
+    def filler(attr):
+        if "profile" in attr or attr.endswith("_id"):
+            return vid0
+        return "moka-test"
+
+    attrs = {}
+    st, js, raw = 0, None, ""
     conv_id_new = None
-    if isinstance(js, dict):
-        conv_id_new = (js.get("data") or {}).get("id")
+    for attempt in range(16):
+        body = {"data": {"type": "customer-agent-conversation",
+                         "attributes": dict(attrs)}}
+        st, js, raw = rest_fn("POST", create_path, full_key, body,
+                              revision=create_rev)
+        run.save(f"ag3_try_{attempt}.txt", raw)
+        if isinstance(js, dict):
+            conv_id_new = (js.get("data") or {}).get("id")
+        print(f"[AG-3] try {attempt} attrs={sorted(attrs)} -> {st}",
+              flush=True)
+        if st in (200, 201) and conv_id_new:
+            break
+        if st != 400 or not isinstance(js, dict):
+            break
+        errs = js.get("errors") or []
+        progressed = False
+        for e in errs:
+            ptr = ((e.get("source") or {}).get("pointer") or "")
+            detail = e.get("detail") or ""
+            m = re.match(r"^/data/attributes/(.+)$", ptr)
+            if not m:
+                continue
+            attr = m.group(1)
+            if attr in attrs:
+                continue
+            if attr == "mode":
+                attrs["mode"] = mode_candidates[0]
+            elif "is a required field" in detail or "required" in detail:
+                attrs[attr] = filler(attr)
+            else:
+                continue
+            progressed = True
+        # If 'mode' was supplied but rejected as invalid, rotate value.
+        if (isinstance(js, dict) and "mode" in attrs
+                and any(((e.get("source") or {}).get("pointer") or "")
+                        .endswith("/mode") for e in errs)
+                and st == 400):
+            cur = mode_candidates.index(attrs["mode"]) \
+                if attrs["mode"] in mode_candidates else -1
+            if cur + 1 < len(mode_candidates):
+                attrs["mode"] = mode_candidates[cur + 1]
+                progressed = True
+        if not progressed:
+            break
+    run.save("ag3_create.txt", raw)
     print(f"[AG-3] POST {create_path} -> {st} id="
           f"{'yes' if conv_id_new else 'no'}", flush=True)
     if st in (200, 201) and conv_id_new:
@@ -868,6 +923,26 @@ class FakeKlaviyo:
                            'conversations."}]}')
                     return 403, _try_json(raw), raw
                 if self.mode in ("creatable", "rebind_ok"):
+                    # Model the real API's field validation (run #612):
+                    # 'mode' is required and must be a valid value.
+                    cattrs = (body or {}).get("data", {}).get(
+                        "attributes", {})
+                    if "mode" not in cattrs:
+                        raw = json.dumps({"errors": [{
+                            "status": 400, "code": "invalid",
+                            "detail": "'mode' is a required field for "
+                                      "the resource "
+                                      "'customer-agent-conversation'.",
+                            "source": {"pointer":
+                                       "/data/attributes/mode"}}]})
+                        return 400, _try_json(raw), raw
+                    if cattrs.get("mode") != "chat":
+                        raw = json.dumps({"errors": [{
+                            "status": 400, "code": "invalid",
+                            "detail": "'mode' is invalid.",
+                            "source": {"pointer":
+                                       "/data/attributes/mode"}}]})
+                        return 400, _try_json(raw), raw
                     cid = f"conv-{len(self.convs) + 1}"
                     self.convs[cid] = None
                     js = {"data": {"id": cid, "type":
