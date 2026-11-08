@@ -49,6 +49,8 @@ jobs:
           ZD_AUTH_CODE3: ${{ secrets.ZD_AUTH_CODE3 }}
           ZD_AUTH_CODE4: ${{ secrets.ZD_AUTH_CODE4 }}
           ZD_AUTH_CODE5: ${{ secrets.ZD_AUTH_CODE5 }}
+          ZD_AUTH_CODE6: ${{ secrets.ZD_AUTH_CODE6 }}
+          ZENDESK_EMAIL_LOW: mimi05741b+zendesk-low@bugcrowdninja.com
           ZD_CLIENT_ID: ${{ secrets.ZD_CLIENT_ID }}
           ZD_CLIENT_SECRET: ${{ secrets.ZD_CLIENT_SECRET }}
           ZENDESK_SUBDOMAIN: bb-mimi05741b
