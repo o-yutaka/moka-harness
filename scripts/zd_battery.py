@@ -97,15 +97,19 @@ def bootstrap_token(subdomain, outdir):
                             "code": code,
                             "redirect_uri":
                                 "https://example.com/oauth/callback"}))
-            break
     for label, fields in grants:
         body = dict(fields)
         body.update({"client_id": cid, "client_secret": csec,
                      "scope": "read write"})
-        data = urllib.parse.urlencode(body).encode()
+        # JSON body, exactly like zd_exchange.py, whose exchange
+        # measured 200 (run #622). The form-urlencoded variant
+        # measured 400 (run #626) — transport shape is the prime
+        # suspect; the OAuth error body is saved for diagnosis.
+        data = json.dumps(body).encode()
         req = urllib.request.Request(
             url, data=data, method="POST",
-            headers={"Content-Type": "application/x-www-form-urlencoded",
+            headers={"Content-Type": "application/json",
+                     "Accept": "application/json",
                      "User-Agent": UA})
         status, raw = 0, b""
         try:
@@ -117,6 +121,16 @@ def bootstrap_token(subdomain, outdir):
             print(f"[AUTH] {label} NETERR {type(e).__name__}", flush=True)
             continue
         print(f"[AUTH] {label} -> {status}", flush=True)
+        if status != 200:
+            Path(outdir).mkdir(parents=True, exist_ok=True)
+            (Path(outdir) / f"auth-error-{label.replace(':', '_')}.txt") \
+                .write_bytes(raw[:2000])
+            try:
+                ej = json.loads(raw.decode())
+                print(f"[AUTH] {label} error={ej.get('error')} "
+                      f"desc={ej.get('error_description')}", flush=True)
+            except Exception:
+                pass
         if status == 200:
             try:
                 tok = json.loads(raw.decode())
