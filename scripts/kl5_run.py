@@ -337,7 +337,10 @@ def resolve_keys(rest_fn, key_x, key_y, run_id, run):
     classes = {}
     for label, key in (("X", key_x), ("Y", key_y)):
         st_get, _js, raw_get = rest_fn("GET", "/api/accounts/", key)
-        probe_email = marker_email("x0", run_id) + f".{label.lower()}"
+        # Valid address required (same defect as kl1 runs #606/#608:
+        # appending ".x" after the full address yields "...@gmail.com.x",
+        # which the real API rejects 400 even for a FULL key).
+        probe_email = marker_email(f"x0{label.lower()}", run_id)
         st_post, _js2, raw_post = create_profile(rest_fn, key, {
             "email": probe_email, "first_name": "KL5",
             "last_name": f"PROBE-{label}-{run_id}",
@@ -346,7 +349,7 @@ def resolve_keys(rest_fn, key_x, key_y, run_id, run):
         classes[label] = cls
         records[label] = {"get_accounts_status": st_get,
                           "probe_post_status": st_post, "class": cls,
-                          "probe_email_tag": f"x0.{label.lower()}"}
+                          "probe_email_tag": f"x0{label.lower()}"}
         run.save(f"step0_{label}.txt", raw_get + "\n---\n" + raw_post)
         print(f"[STEP0] key {label}: accounts={st_get} probe_post="
               f"{st_post} -> {cls}", flush=True)
@@ -1013,7 +1016,7 @@ def main_live():
         if prof:
             all_ids.append(prof["id"])
     for label in ("x", "y"):
-        em = marker_email("x0", run_id) + f".{label}"
+        em = marker_email(f"x0{label}", run_id)
         _st, prof, _raw = find_by_email(rest, full_key, em)
         if prof:
             all_ids.append(prof["id"])
@@ -1092,6 +1095,14 @@ class FakeServer:
             if key == self.RO:
                 return 403, {"errors": []}, '{"errors": []}'
             attrs = body["data"]["attributes"]
+            # Model real-API validation (authz first, then validation):
+            # malformed email -> 400 even for FULL. Without this the
+            # Step 0 probe-email defect is invisible to the selftest.
+            em = attrs.get("email")
+            if em and not re.match(r"^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$", em):
+                err = {"errors": [{"status": 400, "code": "invalid",
+                                   "detail": "Invalid email address"}]}
+                return 400, err, json.dumps(err)
             pid = self.create_or_update(attrs)
             js = {"data": self.profile_json(pid)}
             return 201, js, json.dumps(js)
