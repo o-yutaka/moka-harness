@@ -457,11 +457,49 @@ def event_body_e2(profile_attrs, metric_name, properties):
                             "attributes": {"name": metric_name}}},
         "properties": dict(properties)}}}
 
-EVENT_BUILDERS = (("E1", event_body_e1), ("E2", event_body_e2))
+def event_body_e3(profile_attrs, metric_name, properties):
+    """Relationship shape: profile as {data:{type:profile, attributes}}
+    — the live API's 400 for E1/E2 named exactly this: "'data' key
+    missing in relationship" (pointer /data/attributes/profile),
+    measured run #616 (2026-11-09)."""
+    prof = {}
+    for k in ("email", "phone_number", "external_id"):
+        if profile_attrs.get(k):
+            prof[k] = profile_attrs[k]
+    for k, v in profile_attrs.get("extra_profile_props", {}).items():
+        prof[k] = v
+    return {"data": {"type": "event", "attributes": {
+        "profile": {"data": {"type": "profile", "attributes": prof}},
+        "metric": {"data": {"type": "metric",
+                            "attributes": {"name": metric_name}}},
+        "properties": dict(properties)}}}
+
+def event_body_e4(profile_attrs, metric_name, properties):
+    """Relationship shape with $-prefixed identifiers inside."""
+    prof = {}
+    if profile_attrs.get("email"):
+        prof["$email"] = profile_attrs["email"]
+    if profile_attrs.get("phone_number"):
+        prof["$phone_number"] = profile_attrs["phone_number"]
+    if profile_attrs.get("external_id"):
+        prof["$external_id"] = profile_attrs["external_id"]
+    for k, v in profile_attrs.get("extra_profile_props", {}).items():
+        prof[k] = v
+    return {"data": {"type": "event", "attributes": {
+        "profile": {"data": {"type": "profile", "attributes": prof}},
+        "metric": {"data": {"type": "metric",
+                            "attributes": {"name": metric_name}}},
+        "properties": dict(properties)}}}
+
+EVENT_BUILDERS = (("E1", event_body_e1), ("E2", event_body_e2),
+                  ("E3", event_body_e3), ("E4", event_body_e4))
 
 def sub_body_a(email, consent):
-    """Create Client Subscription, bulk-style nested profile shape."""
-    return {"data": {"type": "client-subscription", "attributes": {
+    """Create Client Subscription, bulk-style nested profile shape.
+    Type must be "subscription": the live API rejected
+    "client-subscription" naming the expected type verbatim
+    (run #616, 2026-11-09)."""
+    return {"data": {"type": "subscription", "attributes": {
         "profile": {"data": {"type": "profile", "attributes": {
             "email": email,
             "subscriptions": {"email": {"marketing": {
@@ -469,7 +507,7 @@ def sub_body_a(email, consent):
 
 def sub_body_b(email, consent):
     """Fallback: profile attributes directly under attributes."""
-    return {"data": {"type": "client-subscription", "attributes": {
+    return {"data": {"type": "subscription", "attributes": {
         "profile": {"email": email,
                     "subscriptions": {"email": {"marketing": {
                         "consent": consent}}}}}}}
@@ -1212,22 +1250,36 @@ class FakeClient:
             return 202, None, ""
         if path == "/client/events/":
             prof = attrs.get("profile") or {}
-            if not any(k.startswith("$") for k in prof):
-                return 400, {"errors": []}, '{"errors": []}'
+            # Relationship form (E3/E4): {data:{type:profile,
+            # attributes:{...}}}. Flat form must carry $-identifiers
+            # (E1); a flat dict without them (E2) gets the REAL API's
+            # measured error: "'data' key missing in relationship".
+            if isinstance(prof.get("data"), dict):
+                prof = (prof["data"].get("attributes") or {})
+            elif not any(k.startswith("$") for k in prof):
+                raw = json.dumps({"errors": [{
+                    "status": 400, "code": "invalid",
+                    "detail": "'data' key missing in relationship",
+                    "source": {"pointer": "/data/attributes/profile"}}]})
+                return 400, _try_json(raw), raw
             idents = {}
-            if prof.get("$email"):
-                idents["email"] = prof["$email"]
-            if prof.get("$phone_number"):
-                idents["phone_number"] = prof["$phone_number"]
-            if prof.get("$external_id"):
-                idents["external_id"] = prof["$external_id"]
+            if prof.get("$email") or prof.get("email"):
+                idents["email"] = prof.get("$email") or prof.get("email")
+            if prof.get("$phone_number") or prof.get("phone_number"):
+                idents["phone_number"] = prof.get("$phone_number") \
+                    or prof.get("phone_number")
+            if prof.get("$external_id") or prof.get("external_id"):
+                idents["external_id"] = prof.get("$external_id") \
+                    or prof.get("external_id")
             targets = self._matches(idents)
             if not targets:
                 pid = self.srv.create_or_update(
                     {k: v for k, v in idents.items() if v})
                 targets = [pid]
             extras = {k: v for k, v in prof.items()
-                      if not k.startswith("$")}
+                      if not k.startswith("$")
+                      and k not in ("email", "phone_number",
+                                    "external_id")}
             for pid in targets:
                 self.srv.events.append(
                     {"profile_id": pid,
@@ -1240,6 +1292,17 @@ class FakeClient:
                     self.srv.profiles[pid] = merged
             return 202, None, ""
         if path == "/client/subscriptions/":
+            # Model the real API's measured type check (run #616):
+            # anything but "subscription" is rejected naming it.
+            if data.get("type") != "subscription":
+                raw = json.dumps({"errors": [{
+                    "status": 400, "code": "invalid",
+                    "detail": f"'{data.get('type')}' is not the resource "
+                              "type expected at this endpoint. "
+                              "'subscription' is the expected resource "
+                              "type.",
+                    "source": {"pointer": "/data/type"}}]})
+                return 400, _try_json(raw), raw
             prof = ((attrs.get("profile") or {}).get("data") or {}) \
                 .get("attributes") or {}
             if not prof:
