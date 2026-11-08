@@ -290,7 +290,12 @@ def resolve_keys(rest_fn, key_x, key_y, run_id, run):
     classes = {}
     for label, key in (("X", key_x), ("Y", key_y)):
         st_get, _js, raw_get = rest_fn("GET", "/api/accounts/", key)
-        probe_email = marker_email("x0", run_id) + f".{label.lower()}"
+        # Probe email must be a VALID address: appending ".x" after the
+        # full address (the original construction) produced
+        # "...@gmail.com.x", which the real API rejects with 400
+        # "Invalid email address" even for a FULL key — discrimination
+        # then classified FULL as OTHER and aborted (runs #606/#608).
+        probe_email = marker_email(f"x0{label.lower()}", run_id)
         st_post, _js2, raw_post = create_profile(rest_fn, key, {
             "email": probe_email, "first_name": "KL1",
             "last_name": f"PROBE-{label}-{run_id}",
@@ -299,7 +304,7 @@ def resolve_keys(rest_fn, key_x, key_y, run_id, run):
         classes[label] = cls
         records[label] = {"get_accounts_status": st_get,
                           "probe_post_status": st_post, "class": cls,
-                          "probe_email_tag": f"x0.{label.lower()}"}
+                          "probe_email_tag": f"x0{label.lower()}"}
         run.save(f"step0_{label}.txt", raw_get + "\n---\n" + raw_post)
         print(f"[STEP0] key {label}: accounts={st_get} probe_post="
               f"{st_post} -> {cls}", flush=True)
@@ -728,7 +733,7 @@ def main_live():
         if prof:
             all_ids.append(prof["id"])
     for label in ("x", "y"):
-        em = marker_email("x0", run_id) + f".{label}"
+        em = marker_email(f"x0{label}", run_id)
         _st, prof, _raw = find_by_email(rest, full_key, em)
         if prof:
             all_ids.append(prof["id"])
@@ -819,6 +824,15 @@ class FakeKlaviyo:
             if key == self.RO and self.mode != "both_full":
                 return 403, {"errors": []}, '{"errors": []}'
             attrs = body["data"]["attributes"]
+            # Model the real API's validation (authz first, then input
+            # validation): a malformed email is a 400 even for FULL.
+            # Without this, Step 0's probe-email construction bug was
+            # invisible to the selftest (runs #606/#608 aborted live).
+            em = attrs.get("email")
+            if em and not re.match(r"^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$", em):
+                err = {"errors": [{"status": 400, "code": "invalid",
+                                   "detail": "Invalid email address"}]}
+                return 400, err, json.dumps(err)
             pid = self._create_or_update(attrs)
             js = {"data": self._profile_json(pid)}
             return 201, js, json.dumps(js)
