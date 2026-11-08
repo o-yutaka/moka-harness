@@ -420,9 +420,20 @@ def ag_legs(rest_fn, ro_key, full_key, run, seed):
     # values for each required field the API names, following its
     # source pointers, bounded to 16 POSTs, every body saved.
     create_path, create_rev = working if working else AGENT_PATHS[0]
-    mode_candidates = ["web", "chat", "ai", "automated", "live_chat",
-                       "email", "sms", "whatsapp", "async", "sync",
-                       "test", "human"]
+    # Enum values from Klaviyo's official OpenAPI spec for this beta
+    # (ConversationResponse.mode / .channel), read 2026-11-09 from
+    # klaviyo/openapi: mode = preview|live, channel = web-chat|sms|
+    # email|whatsapp|instagram|voice. "preview" first: non-billed
+    # test mode. The earlier blind candidate list (12 values) all
+    # measured invalid; 'web' was additionally skipped by a rotation
+    # bug fixed below (assign and rotate no longer fire together).
+    ENUM_CANDIDATES = {
+        "mode": ["preview", "live", "web", "chat", "ai", "automated",
+                 "live_chat", "email", "sms", "whatsapp", "async",
+                 "sync", "test", "human"],
+        "channel": ["web-chat", "sms", "email", "whatsapp",
+                    "instagram", "voice"],
+    }
     vid0 = seed["profiles"]["V"]["id"]
 
     def filler(attr):
@@ -433,7 +444,8 @@ def ag_legs(rest_fn, ro_key, full_key, run, seed):
     attrs = {}
     st, js, raw = 0, None, ""
     conv_id_new = None
-    for attempt in range(16):
+    for attempt in range(24):
+        sent = dict(attrs)
         body = {"data": {"type": "customer-agent-conversation",
                          "attributes": dict(attrs)}}
         st, js, raw = rest_fn("POST", create_path, full_key, body,
@@ -449,6 +461,7 @@ def ag_legs(rest_fn, ro_key, full_key, run, seed):
             break
         errs = js.get("errors") or []
         progressed = False
+        assigned = set()
         for e in errs:
             ptr = ((e.get("source") or {}).get("pointer") or "")
             detail = e.get("detail") or ""
@@ -458,22 +471,31 @@ def ag_legs(rest_fn, ro_key, full_key, run, seed):
             attr = m.group(1)
             if attr in attrs:
                 continue
-            if attr == "mode":
-                attrs["mode"] = mode_candidates[0]
+            if attr in ENUM_CANDIDATES:
+                attrs[attr] = ENUM_CANDIDATES[attr][0]
             elif "is a required field" in detail or "required" in detail:
                 attrs[attr] = filler(attr)
             else:
                 continue
+            assigned.add(attr)
             progressed = True
-        # If 'mode' was supplied but rejected as invalid, rotate value.
-        if (isinstance(js, dict) and "mode" in attrs
-                and any(((e.get("source") or {}).get("pointer") or "")
-                        .endswith("/mode") for e in errs)
-                and st == 400):
-            cur = mode_candidates.index(attrs["mode"]) \
-                if attrs["mode"] in mode_candidates else -1
-            if cur + 1 < len(mode_candidates):
-                attrs["mode"] = mode_candidates[cur + 1]
+        # Rotate an enum value that was SENT this attempt and rejected
+        # as an invalid choice (never in the same pass that assigned
+        # it — that double-advance skipped a candidate in run #621).
+        for e in errs:
+            ptr = ((e.get("source") or {}).get("pointer") or "")
+            m = re.match(r"^/data/attributes/(.+)$", ptr)
+            if not m:
+                continue
+            attr = m.group(1)
+            if attr in assigned or attr not in sent:
+                continue
+            cands = ENUM_CANDIDATES.get(attr)
+            if not cands:
+                continue
+            cur = cands.index(sent[attr]) if sent[attr] in cands else -1
+            if cur + 1 < len(cands):
+                attrs[attr] = cands[cur + 1]
                 progressed = True
         if not progressed:
             break
@@ -936,7 +958,7 @@ class FakeKlaviyo:
                             "source": {"pointer":
                                        "/data/attributes/mode"}}]})
                         return 400, _try_json(raw), raw
-                    if cattrs.get("mode") != "chat":
+                    if cattrs.get("mode") != "preview":
                         raw = json.dumps({"errors": [{
                             "status": 400, "code": "invalid",
                             "detail": "'mode' is invalid.",
