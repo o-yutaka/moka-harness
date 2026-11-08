@@ -92,6 +92,13 @@ from pathlib import Path
 
 API_BASE = "https://a.klaviyo.com"
 REVISION = os.environ.get("KL5_REVISION", "2024-10-15")
+# Client endpoints are revision-sensitive in the OTHER direction:
+# at 2024-10-15 the client-subscription profile schema has no
+# `subscriptions` field (measured 400 "'subscriptions' is not a
+# valid field", run #624). The official spec (version 2026-10-15)
+# includes it. Client calls therefore default to the current
+# revision; server calls keep the recorded 2024-10-15.
+CLIENT_REVISION = os.environ.get("KL5_CLIENT_REVISION", "2026-10-15")
 OUTPUTS_ROOT = Path(os.environ.get("KL5_OUTPUTS_ROOT", "outputs"))
 OUT_DIR = OUTPUTS_ROOT / "kl5"
 MARKER_DOMAIN = "gmail.com"
@@ -180,7 +187,8 @@ def _client_once(path, company_id, body=None, revision=None, timeout=60):
 def client_post(path, company_id, body=None, revision=None, timeout=60):
     """Client API (company_id only, unauthenticated) with 429 retry."""
     return _with_throttle_retry(
-        lambda: _client_once(path, company_id, body, revision, timeout))
+        lambda: _client_once(path, company_id, body,
+                             revision or CLIENT_REVISION, timeout))
 
 
 def _try_json(raw):
@@ -494,7 +502,21 @@ def event_body_e4(profile_attrs, metric_name, properties):
 EVENT_BUILDERS = (("E1", event_body_e1), ("E2", event_body_e2),
                   ("E3", event_body_e3), ("E4", event_body_e4))
 
-def sub_body_a(email, consent):
+def sub_body_a2(email, consent, list_id=None):
+    """Spec-exact shape (official OpenAPI, version 2026-10-15):
+    relationships.list is REQUIRED on this resource, and profile
+    attributes carry the subscriptions object."""
+    body = {"data": {"type": "subscription", "attributes": {
+        "profile": {"data": {"type": "profile", "attributes": {
+            "email": email,
+            "subscriptions": {"email": {"marketing": {
+                "consent": consent}}}}}}}}}
+    if list_id:
+        body["data"]["relationships"] = {
+            "list": {"data": {"type": "list", "id": list_id}}}
+    return body
+
+def sub_body_a(email, consent, list_id=None):
     """Create Client Subscription, bulk-style nested profile shape.
     Type must be "subscription": the live API rejected
     "client-subscription" naming the expected type verbatim
@@ -505,14 +527,15 @@ def sub_body_a(email, consent):
             "subscriptions": {"email": {"marketing": {
                 "consent": consent}}}}}}}}}
 
-def sub_body_b(email, consent):
+def sub_body_b(email, consent, list_id=None):
     """Fallback: profile attributes directly under attributes."""
     return {"data": {"type": "subscription", "attributes": {
         "profile": {"email": email,
                     "subscriptions": {"email": {"marketing": {
                         "consent": consent}}}}}}}
 
-SUB_BUILDERS = (("A", sub_body_a), ("B", sub_body_b))
+SUB_BUILDERS = (("A2", sub_body_a2), ("A", sub_body_a),
+                ("B", sub_body_b))
 
 # ------------------------------------------------------- consent reading ----
 
@@ -794,9 +817,14 @@ def cl_legs(srv, cli, full_key, run_id, run, seed):
     mut_val = f"EVMUT-{run_id}"
     ev_builder = None
     for name, b in EVENT_BUILDERS:
+        # Shape discovery with IDENTIFIERS ONLY: at run #624 the E3
+        # relationship shape was validated field-by-field and the
+        # only rejection was the custom probe key ('kl5_evprobe' is
+        # not a valid field for 'profile'). Custom properties are
+        # not valid profile fields on this surface; the mutation
+        # probe below therefore uses a REAL field (first_name).
         st, _js, raw = cli("/client/events/", COMPANY_ID, b(
-            {"email": ev_now,
-             "extra_profile_props": {"kl5_evprobe": mut_val}},
+            {"email": ev_now},
             metric, {"kl5_ev": ev_val}))
         run.save(f"cl5_event_{name}.txt", raw)
         print(f"[CL-5] event shape {name} -> {st}", flush=True)
@@ -819,22 +847,35 @@ def cl_legs(srv, cli, full_key, run_id, run, seed):
                     "an event bearing only the victim email identifier "
                     "was ingested onto the existing profile's timeline"
                     if seen else "event never observed on V's timeline")
+        # Mutation probe: a separate event whose profile object
+        # carries a REAL profile field (first_name) set to a probe
+        # value. If ingestion writes profile-object fields back,
+        # V's first_name changes without any key-authenticated call.
+        evm_val = f"EVM-{run_id}"
+        stm, _jsm, rawm = cli("/client/events/", COMPANY_ID,
+                              build_event(
+                                  {"email": ev_now,
+                                   "extra_profile_props": {
+                                       "first_name": mut_val}},
+                                  metric, {"kl5_ev": evm_val}))
+        run.save("cl5_mut_event.txt", rawm)
+        print(f"[CL-5] mutation event -> {stm}", flush=True)
         mut = poll_until(lambda: _on_profile_id(srv, full_key, vid,
-                                                "kl5_evprobe", mut_val),
+                                                "first_name", mut_val),
                          timeout=min(POLL_TIMEOUT, 60.0))
         print(f"[CL-5] event profile-object mutation on V: {bool(mut)}",
               flush=True)
         if mut:
             outcomes["existing_mutation"].append("CL5-EVENT")
             run.verdict("KL5-CL5-EVENT-MUTATE", "MUTATES",
-                        "non-identifier keys in an event's profile "
-                        "object rewrote the existing profile's "
-                        "properties — event ingestion is a profile-"
-                        "mutation channel on the client surface too")
+                        "a real profile field (first_name) carried in "
+                        "an event's profile object rewrote the existing "
+                        "profile — event ingestion is a profile-mutation "
+                        "channel on the client surface too")
         else:
             run.verdict("KL5-CL5-EVENT-MUTATE", "NO-MUTATE",
                         "event profile object stayed identifiers-only "
-                        "in effect; no property rewrite observed")
+                        "in effect; no field rewrite observed")
         # CL-5b: phone-keyed event attribution.
         ev2_val = f"EVT2-{run_id}"
         st, _js, raw = cli("/client/events/", COMPANY_ID, build_event(
@@ -856,10 +897,26 @@ def cl_legs(srv, cli, full_key, run_id, run, seed):
     run.save("cl6_baseline.txt", raw0)
     print(f"[CL-6] V baseline email-marketing consent: {consent0}",
           flush=True)
+    # The spec-exact shape needs a list relationship: resolve one
+    # list in tenant B (first existing, else create a probe list).
+    list_id = None
+    _stl, jsl, rawl = srv("GET", "/api/lists/", full_key)
+    run.save("cl6_lists.txt", rawl)
+    if isinstance(jsl, dict) and jsl.get("data"):
+        list_id = jsl["data"][0].get("id")
+    if not list_id:
+        _stc2, jsc, rawc = srv("POST", "/api/lists/", full_key,
+                               {"data": {"type": "list", "attributes": {
+                                   "name": f"KL5 Probe {run_id}"}}})
+        run.save("cl6_list_create.txt", rawc)
+        if isinstance(jsc, dict):
+            list_id = (jsc.get("data") or {}).get("id")
+    print(f"[CL-6] list relationship id resolved: {bool(list_id)}",
+          flush=True)
     sub_builder = None
     for name, b in SUB_BUILDERS:
         st, _js, raw = cli("/client/subscriptions/", COMPANY_ID,
-                           b(ev_now, "SUBSCRIBED"))
+                           b(ev_now, "SUBSCRIBED", list_id))
         run.save(f"cl6_sub_{name}.txt", raw)
         print(f"[CL-6] subscription shape {name} -> {st}", flush=True)
         if st in (200, 202):
@@ -887,7 +944,7 @@ def cl_legs(srv, cli, full_key, run_id, run, seed):
                         "SUBSCRIBED — unauthenticated consent write")
             # CL-7: flip it back off, same surface.
             st, _js, raw = cli("/client/subscriptions/", COMPANY_ID,
-                               build_sub(ev_now, "UNSUBSCRIBED"))
+                               build_sub(ev_now, "UNSUBSCRIBED", list_id))
             run.save("cl7_unsub.txt", raw)
             got2 = poll_until(lambda: _consent_is(srv, full_key, vid,
                                                   "UNSUBSCRIBED"))
@@ -1285,10 +1342,10 @@ class FakeClient:
                     {"profile_id": pid,
                      "properties": dict(attrs.get("properties") or {})})
                 if self.mode != "held" and extras:
+                    # Event profile-object fields write back as
+                    # profile fields (the mutation under test).
                     merged = dict(self.srv.profiles[pid])
-                    props = dict(merged.get("properties", {}))
-                    props.update(extras)
-                    merged["properties"] = props
+                    merged.update(extras)
                     self.srv.profiles[pid] = merged
             return 202, None, ""
         if path == "/client/subscriptions/":
