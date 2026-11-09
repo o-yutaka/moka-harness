@@ -122,7 +122,7 @@ def main():
                 role, indent=2, ensure_ascii=False))
             return 0
         path, current = "ticket_comment_access", ca
-        new_value = "public-and-private"
+        new_value = "public"
     else:
         targets = [(p, v) for p, v in interesting
                    if isinstance(v, bool)
