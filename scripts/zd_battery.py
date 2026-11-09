@@ -47,6 +47,16 @@ from pathlib import Path
 REQUIRED_ENV = ("ZENDESK_SUBDOMAIN",)
 UA = "moka-zd-battery/1.0 (Bugcrowd research; own test tenant only)"
 
+# Canary endpoints can arrive as one secret blob (KEY=VALUE lines) so the
+# individual CANARY_* URLs never sit in the public repo or workflow file.
+_blob = os.environ.get("ZD_CANARY_BLOB", "")
+if _blob:
+    for _line in _blob.splitlines():
+        _line = _line.strip()
+        if _line and "=" in _line and not _line.startswith("#"):
+            _k, _v = _line.split("=", 1)
+            os.environ.setdefault(_k.strip(), _v.strip())
+
 
 def die_refuse(msg):
     print(f"REFUSED: {msg}")
