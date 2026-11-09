@@ -44,6 +44,7 @@ jobs:
           LD_PAT_B: ${{ secrets.LD_PAT_B }}
           KLAVIYO_KEY_X: ${{ secrets.KLAVIYO_KEY_X }}
           KLAVIYO_KEY_Y: ${{ secrets.KLAVIYO_KEY_Y }}
+          KL6_CANARY_KEY: ${{ secrets.KL6_CANARY_KEY }}
           ZD_AUTH_CODE: ${{ secrets.ZD_AUTH_CODE }}
           ZD_AUTH_CODE2: ${{ secrets.ZD_AUTH_CODE2 }}
           ZD_AUTH_CODE3: ${{ secrets.ZD_AUTH_CODE3 }}
