@@ -32,7 +32,7 @@ jobs:
           MT_KEY_A_RO: ${{ secrets.MT_KEY_A_RO }}
           MT_ORG_B: ${{ secrets.MT_ORG_B }}
           MT_KEY_B: ${{ secrets.MT_KEY_B }}
-          MT_IA_B: ${{ vars.MT_IA_B }}
+          MT_IA_B: ${{ secrets.MT_IA_B }}
           MT_CP_A: ${{ vars.MT_CP_A }}
           AIVEN_TOKEN_1: ${{ secrets.AIVEN_TOKEN_1 }}
           AIVEN_TOKEN_2: ${{ secrets.AIVEN_TOKEN_2 }}
@@ -54,7 +54,7 @@ jobs:
           ZD_AUTH_CODE8: ${{ secrets.ZD_AUTH_CODE8 }}
           ZD_AUTH_CODE9: ${{ secrets.ZD_AUTH_CODE9 }}
           ZD_AUTH_CODE_LOW: ${{ secrets.ZD_AUTH_CODE_LOW }}
-        ZD_REFRESH_LOW: ${{ secrets.ZD_REFRESH_LOW }}
+          ZD_REFRESH_LOW: ${{ secrets.ZD_REFRESH_LOW }}
           ZD_REFRESH_TOKEN: ${{ secrets.ZD_REFRESH_TOKEN }}
           ZENDESK_EMAIL_LOW: mimi05741b+zendesk-low@bugcrowdninja.com
           ZD_CLIENT_ID: ${{ secrets.ZD_CLIENT_ID }}
