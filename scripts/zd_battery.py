@@ -88,7 +88,8 @@ def bootstrap_token(subdomain, outdir):
     if rt:
         grants.append(("refresh", {"grant_type": "refresh_token",
                                    "refresh_token": rt}))
-    for name in ("ZD_AUTH_CODE5", "ZD_AUTH_CODE4", "ZD_AUTH_CODE3",
+    for name in ("ZD_AUTH_CODE8", "ZD_AUTH_CODE7", "ZD_AUTH_CODE5",
+                 "ZD_AUTH_CODE4", "ZD_AUTH_CODE3",
                  "ZD_AUTH_CODE2", "ZD_AUTH_CODE"):
         code = os.environ.get(name, "").strip()
         if code:
