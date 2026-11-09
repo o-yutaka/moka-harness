@@ -460,7 +460,7 @@ def probe_zd1(client, run, ui_done, poll_minutes):
 #     Connection credential (canary hit carrying the planted dummy marker).
 # --------------------------------------------------------------------------
 def probe_zd3(client, run, ui_done, poll_minutes):
-    dummy = marker("ZD3DUMMYSECRET")
+    dummy = os.environ.get("ZD3_DUMMY") or marker("ZD3DUMMYSECRET")
     run.note(f"planted dummy secret marker (value only in this manifest): "
              f"{dummy}")
     if not ui_done:
@@ -831,7 +831,12 @@ def main():
                     help="confirm the probe's UI-lane preconditions are done")
     ap.add_argument("--cleanup", metavar="MANIFEST",
                     help="delete fixtures listed in a run manifest")
+    ap.add_argument("--dummy", metavar="VALUE",
+                    help="fix the probe dummy marker (ZD-3) so the UI lane "
+                         "can plant the exact value before the observer run")
     args = ap.parse_args()
+    if args.dummy:
+        os.environ["ZD3_DUMMY"] = args.dummy
 
     missing = [k for k in REQUIRED_ENV if not os.environ.get(k)]
     if missing:
