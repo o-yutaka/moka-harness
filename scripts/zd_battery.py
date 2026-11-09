@@ -146,13 +146,35 @@ def bootstrap_token(subdomain, outdir):
 def low_client(subdomain, run):
     """Second-identity client for LOW legs. The API-token trick (same
     token + another user's email) died with API tokens; a low identity
-    needs its OWN OAuth token in ZENDESK_ACCESS_TOKEN_LOW."""
+    needs its OWN OAuth token: ZENDESK_ACCESS_TOKEN_LOW directly, or a
+    refresh grant via ZD_REFRESH_LOW (minted once by zd_low_mint)."""
     tok = os.environ.get("ZENDESK_ACCESS_TOKEN_LOW", "").strip()
-    if not tok:
-        die_refuse("LOW legs need ZENDESK_ACCESS_TOKEN_LOW (separate "
-                   "OAuth consent for the restricted user). "
-                   "Precondition unmet; no traffic sent for this leg.")
-    return Client(subdomain, f"Bearer {tok}", run.dir)
+    if tok:
+        return Client(subdomain, f"Bearer {tok}", run.dir)
+    rt = os.environ.get("ZD_REFRESH_LOW", "").strip()
+    cid = os.environ.get("ZD_CLIENT_ID", "")
+    csec = os.environ.get("ZD_CLIENT_SECRET", "")
+    if rt and cid and csec:
+        url = f"https://{subdomain}.zendesk.com/oauth/tokens"
+        payload = {"grant_type": "refresh_token", "refresh_token": rt,
+                   "client_id": cid, "client_secret": csec,
+                   "scope": "read write"}
+        req = urllib.request.Request(
+            url, data=json.dumps(payload).encode(),
+            headers={"Content-Type": "application/json",
+                     "Accept": "application/json", "User-Agent": UA},
+            method="POST")
+        try:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                body = json.loads(r.read().decode())
+            tok = body["access_token"]
+            print("[AUTH] LOW via ZD_REFRESH_LOW -> 200", flush=True)
+            return Client(subdomain, f"Bearer {tok}", run.dir)
+        except Exception as e:
+            die_refuse(f"LOW refresh grant failed: {type(e).__name__}")
+    die_refuse("LOW legs need ZENDESK_ACCESS_TOKEN_LOW or ZD_REFRESH_LOW "
+               "(separate OAuth consent for the restricted user). "
+               "Precondition unmet; no traffic sent for this leg.")
 
 
 class Client:
