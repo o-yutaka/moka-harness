@@ -1,0 +1,42 @@
+name: modal-deploy
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'modal/**'
+      - '.github/workflows/modal-deploy.yml'
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Modal CLI
+        run: pip install "modal==1.6.3"
+      - name: Configure Modal token
+        env:
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+        run: |
+          if [ -z "$MODAL_TOKEN_ID" ]; then echo "MODAL_TOKEN_ID secret missing"; exit 1; fi
+          modal token set --token-id "$MODAL_TOKEN_ID" --token-secret "$MODAL_TOKEN_SECRET" --profile=o-yutaka
+      - name: Download models into Modal volume
+        working-directory: modal
+        run: modal run modal_app.py
+      - name: Deploy app
+        working-directory: modal
+        run: modal deploy modal_app.py
+      - name: Verify endpoint
+        continue-on-error: true
+        run: |
+          URL="https://o-yutaka--qwen-image-21-serve.modal.run"
+          echo "Endpoint: $URL"
+          for i in 1 2 3 4 5 6; do
+            code=$(curl -s -o /tmp/resp.html -w "%{http_code}" --max-time 600 "$URL" || true)
+            echo "attempt $i: HTTP $code"
+            if [ "$code" = "200" ]; then grep -ci gradio /tmp/resp.html || true; break; fi
+            sleep 20
+          done
