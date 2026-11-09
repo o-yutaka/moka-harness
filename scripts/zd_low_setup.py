@@ -47,7 +47,7 @@ def main():
     cid = os.environ["ZD_CLIENT_ID"]
     csec = os.environ["ZD_CLIENT_SECRET"]
     token = None
-    for name in ("ZD_AUTH_CODE7", "ZD_AUTH_CODE6", "ZD_AUTH_CODE5",
+    for name in ("ZD_AUTH_CODE9", "ZD_AUTH_CODE8", "ZD_AUTH_CODE7", "ZD_AUTH_CODE6", "ZD_AUTH_CODE5",
                  "ZD_AUTH_CODE4",
                  "ZD_AUTH_CODE3", "ZD_AUTH_CODE2", "ZD_AUTH_CODE"):
         code = os.environ.get(name, "").strip()
