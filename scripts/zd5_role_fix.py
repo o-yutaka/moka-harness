@@ -144,10 +144,16 @@ def main():
             return 0
     new_config = json.loads(json.dumps(config))
     set_path(new_config, path, new_value)
+    # Measured 2026-11-09 (run #734): a full-configuration PUT returns
+    # 200 but silently applies nothing (updated_at unchanged). The
+    # update endpoint takes a PARTIAL configuration (only changed
+    # keys). Send only the flipped key.
+    partial = {path.split(".")[-1]: new_value}
+    print(f"ROLEFIX partial payload: {json.dumps(partial)}")
     st, parsed, _ = client.call("rf-put-role", "PUT",
                                 f"/custom_roles/{crid}.json",
                                 {"custom_role": {
-                                    "configuration": new_config}})
+                                    "configuration": partial}})
     print(f"ROLEFIX PUT status={st}")
     st, parsed, _ = client.call("rf-get-role2", "GET",
                                 f"/custom_roles/{crid}.json")
