@@ -794,11 +794,14 @@ def probe_zd5(client, run, ui_done, poll_minutes):
     run.add("macro", macro_id)
 
     def apply_macro(as_client, tid, tag):
-        """Apply the macro to a ticket in this identity's context; True
-        if the marker ends up in the ticket's comments afterwards."""
+        """Render the macro against a ticket in this identity's context;
+        True if the marker ends up rendered (apply preview) or in the
+        ticket's comments afterwards. Surface calibrated in run #698
+        (2026-11-09, verified firsthand): GET /macros/{id}/apply.json
+        ?ticket_id={tid} renders server-side; POST shapes answer 404."""
         st, parsed, raw = as_client.call(
-            f"zd5-apply-{tag}", "POST",
-            f"/tickets/{tid}/macros/{macro_id}/apply.json")
+            f"zd5-apply-{tag}", "GET",
+            f"/macros/{macro_id}/apply.json?ticket_id={tid}")
         print(f"STEP zd5-apply-{tag} status={st}")
         if marker_value.encode() in raw:
             return True
