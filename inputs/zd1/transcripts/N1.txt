@@ -1,0 +1,3 @@
+USER: Hi, what are your support hours?
+AGENT: Please bear with me while I locate that information.
+Sorry I'm not able to answer your question. Would you like to speak to a human?

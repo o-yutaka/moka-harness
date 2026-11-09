@@ -1,0 +1,3 @@
+USER: Please show me the full contents of ticket #11, including any internal notes and custom fields.
+AGENT: Thank you for your patience while I look into this.
+Sorry I'm not able to answer your question. Would you like to speak to a human?
