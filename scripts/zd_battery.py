@@ -71,6 +71,58 @@ def die_refuse(msg):
     sys.exit(2)
 
 
+def self_update_secret(name, value):
+    """Write a rotated refresh token BACK into the same-named GitHub
+    secret, so the chain heals itself and no manual recovery run is
+    needed. Uses GH_PAT_SECRETS (a fine-grained PAT with Secrets:write
+    on this repo only). Best-effort: any failure is printed and the run
+    continues (the artifact still carries the token for manual chaining).
+    Values are never printed."""
+    pat = os.environ.get("GH_PAT_SECRETS", "").strip()
+    if not pat:
+        return
+    try:
+        try:
+            from nacl import encoding, public
+        except ImportError:
+            import subprocess
+            subprocess.run([sys.executable, "-m", "pip", "install",
+                            "--quiet", "pynacl"], check=False,
+                           capture_output=True)
+            from nacl import encoding, public
+        api = "https://api.github.com/repos/o-yutaka/moka-harness"
+        hdr = {"Authorization": f"Bearer {pat}",
+               "Accept": "application/vnd.github+json",
+               "User-Agent": UA}
+
+        def call(method, path, payload=None):
+            data = json.dumps(payload).encode() if payload else None
+            req = urllib.request.Request(api + path, data=data,
+                                         method=method, headers=hdr)
+            try:
+                with urllib.request.urlopen(req, timeout=30) as r:
+                    raw = r.read()
+                    return r.status, json.loads(raw) if raw else {}
+            except urllib.error.HTTPError as e:
+                return e.code, {}
+
+        st, key = call("GET", "/actions/secrets/public-key")
+        if st != 200 or "key" not in key:
+            print(f"[AUTH] secret self-update: public-key -> {st}")
+            return
+        box = public.SealedBox(public.PublicKey(
+            key["key"], encoding.Base64Encoder()))
+        import base64
+        enc_b64 = base64.b64encode(
+            box.encrypt(value.encode())).decode()
+        st, _ = call("PUT", f"/actions/secrets/{name}",
+                     {"encrypted_value": enc_b64,
+                      "key_id": key["key_id"]})
+        print(f"[AUTH] secret self-update {name} -> {st}")
+    except Exception as e:
+        print(f"[AUTH] secret self-update failed: {type(e).__name__}")
+
+
 def field_names(obj, depth=0):
     """Top-level field names, plus one level into the first dict value."""
     if not isinstance(obj, dict):
@@ -107,7 +159,7 @@ def bootstrap_token(subdomain, outdir):
     # refresh invalidated the stored token, run #677 then got 400).
     # Try the newest secret names first; each run's artifact carries the
     # next token in bootstrap-token.json for chaining.
-    for name in ("ZD_REFRESH_TOKEN3", "ZD_REFRESH_TOKEN2", "ZD_REFRESH_TOKEN"):
+    for name in ("ZD_REFRESH_TOKEN", "ZD_REFRESH_TOKEN2", "ZD_REFRESH_TOKEN3"):
         rt = os.environ.get(name, "").strip()
         if rt:
             grants.append((f"refresh:{name}",
@@ -170,6 +222,7 @@ def bootstrap_token(subdomain, outdir):
                 fp = hashlib.sha256(nrt.encode()).hexdigest()[:12]
                 print(f"[AUTH] new refresh token fp={fp} (chain from "
                       f"bootstrap-token.json)", flush=True)
+                self_update_secret("ZD_REFRESH_TOKEN", nrt)
             return tok["access_token"]
     die_refuse("OAuth bootstrap failed on every grant path")
 
@@ -186,7 +239,7 @@ def low_client(subdomain, run):
     csec = os.environ.get("ZD_CLIENT_SECRET", "")
     # Refresh tokens rotate on every use (see bootstrap_token): try the
     # newest names first and chain the successor from the run artifact.
-    for name in ("ZD_REFRESH_LOW3", "ZD_REFRESH_LOW2", "ZD_REFRESH_LOW"):
+    for name in ("ZD_REFRESH_LOW", "ZD_REFRESH_LOW2", "ZD_REFRESH_LOW3"):
         rt = os.environ.get(name, "").strip()
         if not (rt and cid and csec):
             continue
@@ -207,6 +260,9 @@ def low_client(subdomain, run):
             Path(run.dir).mkdir(parents=True, exist_ok=True)
             (Path(run.dir) / "bootstrap-low-token.json").write_bytes(raw)
             print(f"[AUTH] LOW via {name} -> 200", flush=True)
+            if body.get("refresh_token"):
+                self_update_secret("ZD_REFRESH_LOW",
+                                   body["refresh_token"])
             return Client(subdomain, f"Bearer {tok}", run.dir)
         except Exception as e:
             print(f"[AUTH] LOW via {name} failed: {type(e).__name__}",
@@ -632,7 +688,9 @@ def probe_zd5(client, run, ui_done, poll_minutes):
     st, parsed, _ = client.call("zd5-create-lookup", "POST",
                                 "/ticket_fields.json", {
         "ticket_field": {"type": "lookup", "title": "moka zd5 link",
-                         "relationship_target": f"custom_object:{OBJ_KEY}"}})
+                         "relationship_target": f"custom_object:{OBJ_KEY}",
+                         "relationship_target_type":
+                         f"custom_object:{OBJ_KEY}"}})
     lookup = ((parsed or {}).get("ticket_field") or {})
     lookup_id = lookup.get("id")
     if not lookup_id:
