@@ -58,6 +58,7 @@ jobs:
           ZD_REFRESH_LOW: ${{ secrets.ZD_REFRESH_LOW }}
           ZD_REFRESH_TOKEN: ${{ secrets.ZD_REFRESH_TOKEN }}
           ZD_CANARY_BLOB: ${{ secrets.ZD_CANARY_BLOB }}
+          ZD_CANARY_BLOB2: ${{ secrets.ZD_CANARY_BLOB2 }}
           ZENDESK_EMAIL_LOW: mimi05741b+zendesk-low@bugcrowdninja.com
           ZD_CLIENT_ID: ${{ secrets.ZD_CLIENT_ID }}
           ZD_CLIENT_SECRET: ${{ secrets.ZD_CLIENT_SECRET }}
