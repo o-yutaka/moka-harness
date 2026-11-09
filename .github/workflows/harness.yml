@@ -53,6 +53,9 @@ jobs:
           ZD_AUTH_CODE7: ${{ secrets.ZD_AUTH_CODE7 }}
           ZD_AUTH_CODE8: ${{ secrets.ZD_AUTH_CODE8 }}
           ZD_AUTH_CODE9: ${{ secrets.ZD_AUTH_CODE9 }}
+                    ZD_AUTH_CODE_LOW: ${{ secrets.ZD_AUTH_CODE_LOW }}
+                              ZD_REFRESH_LOW: ${{ secrets.ZD_REFRESH_LOW }}
+                                        ZD_REFRESH_TOKEN: ${{ secrets.ZD_REFRESH_TOKEN }}
           ZENDESK_EMAIL_LOW: mimi05741b+zendesk-low@bugcrowdninja.com
           ZD_CLIENT_ID: ${{ secrets.ZD_CLIENT_ID }}
           ZD_CLIENT_SECRET: ${{ secrets.ZD_CLIENT_SECRET }}
