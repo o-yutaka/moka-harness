@@ -5,7 +5,7 @@ JSON into the outputs artifact (zd/bootstrap-low-token.json) so the
 refresh token can be harvested into a GitHub Secret afterwards.
 
 Prints ONLY redacted status lines (public Actions logs).
-Env: ZD_AUTH_CODE_LOW, ZD_CLIENT_ID, ZD_CLIENT_SECRET,
+Env: ZD_AUTH_CODE_LOW2 (preferred) / ZD_AUTH_CODE_LOW, ZD_CLIENT_ID, ZD_CLIENT_SECRET,
      ZENDESK_SUBDOMAIN, ZD_OUT.
 """
 import json
@@ -39,7 +39,7 @@ def post_json(url, payload):
 
 
 def main():
-    code = os.environ.get("ZD_AUTH_CODE_LOW", "").strip()
+    code = (os.environ.get("ZD_AUTH_CODE_LOW2") or os.environ.get("ZD_AUTH_CODE_LOW") or "").strip()
     cid = os.environ.get("ZD_CLIENT_ID", "").strip()
     secret = os.environ.get("ZD_CLIENT_SECRET", "").strip()
     if not code or not cid or not secret:
