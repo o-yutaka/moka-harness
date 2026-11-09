@@ -46,7 +46,7 @@ jobs:
           KLAVIYO_KEY_Y: ${{ secrets.KLAVIYO_KEY_Y }}
           ZD_AUTH_CODE: ${{ secrets.ZD_AUTH_CODE }}
           ZD_AUTH_CODE2: ${{ secrets.ZD_AUTH_CODE2 }}
-         ZD_AUTH_CODE3: ${{ secrets.ZD_AUTH_CODE3 }}
+          ZD_AUTH_CODE3: ${{ secrets.ZD_AUTH_CODE3 }}
           ZD_AUTH_CODE4: ${{ secrets.ZD_AUTH_CODE4 }}
           ZD_AUTH_CODE5: ${{ secrets.ZD_AUTH_CODE5 }}
           ZD_AUTH_CODE6: ${{ secrets.ZD_AUTH_CODE6 }}
