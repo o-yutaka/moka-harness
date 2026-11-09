@@ -56,13 +56,13 @@ jobs:
         ZD_AUTH_CODE_LOW: ${{ secrets.ZD_AUTH_CODE_LOW }}
         ZD_REFRESH_LOW: ${{ secrets.ZD_REFRESH_LOW }}
         ZD_REFRESH_TOKEN: ${{ secrets.ZD_REFRESH_TOKEN }}
-          ZENDESK_EMAIL_LOW: mimi05741b+zendesk-low@bugcrowdninja.com
-          ZD_CLIENT_ID: ${{ secrets.ZD_CLIENT_ID }}
-          ZD_CLIENT_SECRET: ${{ secrets.ZD_CLIENT_SECRET }}
-          ZENDESK_SUBDOMAIN: bb-mimi05741b
-          ZENDESK_EMAIL: mimi05741b+zendesk1@bugcrowdninja.com
-          ZD_OUT: outputs/zd
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        ZENDESK_EMAIL_LOW: mimi05741b+zendesk-low@bugcrowdninja.com
+        ZD_CLIENT_ID: ${{ secrets.ZD_CLIENT_ID }}
+        ZD_CLIENT_SECRET: ${{ secrets.ZD_CLIENT_SECRET }}
+        ZENDESK_SUBDOMAIN: bb-mimi05741b
+        ZENDESK_EMAIL: mimi05741b+zendesk1@bugcrowdninja.com
+        ZD_OUT: outputs/zd
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p outputs
           python "scripts/${{ inputs.script }}.py" ${{ inputs.args }} 2>&1 | tee "outputs/${{ inputs.script }}.log"
