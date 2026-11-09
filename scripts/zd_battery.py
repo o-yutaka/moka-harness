@@ -102,10 +102,17 @@ def bootstrap_token(subdomain, outdir):
         die_refuse("no ZD_CLIENT_ID/SECRET for OAuth bootstrap")
     url = f"https://{subdomain}.zendesk.com/oauth/tokens"
     grants = []
-    rt = os.environ.get("ZD_REFRESH_TOKEN", "").strip()
-    if rt:
-        grants.append(("refresh", {"grant_type": "refresh_token",
-                                   "refresh_token": rt}))
+    # Zendesk ROTATES the refresh token on every successful refresh (the
+    # previous value dies immediately — measured 2026-11-09: run #674's
+    # refresh invalidated the stored token, run #677 then got 400).
+    # Try the newest secret names first; each run's artifact carries the
+    # next token in bootstrap-token.json for chaining.
+    for name in ("ZD_REFRESH_TOKEN3", "ZD_REFRESH_TOKEN2", "ZD_REFRESH_TOKEN"):
+        rt = os.environ.get(name, "").strip()
+        if rt:
+            grants.append((f"refresh:{name}",
+                           {"grant_type": "refresh_token",
+                            "refresh_token": rt}))
     for name in ("ZD_AUTH_CODE9", "ZD_AUTH_CODE8", "ZD_AUTH_CODE7", "ZD_AUTH_CODE5",
                  "ZD_AUTH_CODE4", "ZD_AUTH_CODE3",
                  "ZD_AUTH_CODE2", "ZD_AUTH_CODE"):
@@ -157,6 +164,12 @@ def bootstrap_token(subdomain, outdir):
                 continue
             Path(outdir).mkdir(parents=True, exist_ok=True)
             (Path(outdir) / "bootstrap-token.json").write_bytes(raw)
+            nrt = tok.get("refresh_token", "")
+            if nrt:
+                import hashlib
+                fp = hashlib.sha256(nrt.encode()).hexdigest()[:12]
+                print(f"[AUTH] new refresh token fp={fp} (chain from "
+                      f"bootstrap-token.json)", flush=True)
             return tok["access_token"]
     die_refuse("OAuth bootstrap failed on every grant path")
 
@@ -169,10 +182,14 @@ def low_client(subdomain, run):
     tok = os.environ.get("ZENDESK_ACCESS_TOKEN_LOW", "").strip()
     if tok:
         return Client(subdomain, f"Bearer {tok}", run.dir)
-    rt = os.environ.get("ZD_REFRESH_LOW", "").strip()
     cid = os.environ.get("ZD_CLIENT_ID", "")
     csec = os.environ.get("ZD_CLIENT_SECRET", "")
-    if rt and cid and csec:
+    # Refresh tokens rotate on every use (see bootstrap_token): try the
+    # newest names first and chain the successor from the run artifact.
+    for name in ("ZD_REFRESH_LOW3", "ZD_REFRESH_LOW2", "ZD_REFRESH_LOW"):
+        rt = os.environ.get(name, "").strip()
+        if not (rt and cid and csec):
+            continue
         url = f"https://{subdomain}.zendesk.com/oauth/tokens"
         payload = {"grant_type": "refresh_token", "refresh_token": rt,
                    "client_id": cid, "client_secret": csec,
@@ -184,15 +201,21 @@ def low_client(subdomain, run):
             method="POST")
         try:
             with urllib.request.urlopen(req, timeout=30) as r:
-                body = json.loads(r.read().decode())
+                raw = r.read()
+            body = json.loads(raw.decode())
             tok = body["access_token"]
-            print("[AUTH] LOW via ZD_REFRESH_LOW -> 200", flush=True)
+            Path(run.dir).mkdir(parents=True, exist_ok=True)
+            (Path(run.dir) / "bootstrap-low-token.json").write_bytes(raw)
+            print(f"[AUTH] LOW via {name} -> 200", flush=True)
             return Client(subdomain, f"Bearer {tok}", run.dir)
         except Exception as e:
-            die_refuse(f"LOW refresh grant failed: {type(e).__name__}")
-    die_refuse("LOW legs need ZENDESK_ACCESS_TOKEN_LOW or ZD_REFRESH_LOW "
-               "(separate OAuth consent for the restricted user). "
-               "Precondition unmet; no traffic sent for this leg.")
+            print(f"[AUTH] LOW via {name} failed: {type(e).__name__}",
+                  flush=True)
+            continue
+    die_refuse("LOW legs need ZENDESK_ACCESS_TOKEN_LOW or a live "
+               "ZD_REFRESH_LOW* (separate OAuth consent for the "
+               "restricted user). Precondition unmet; no traffic sent "
+               "for this leg.")
 
 
 class Client:
