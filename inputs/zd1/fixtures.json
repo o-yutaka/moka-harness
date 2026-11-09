@@ -1,0 +1,29 @@
+{
+  "probe": "ZD-1",
+  "tenant": "bb-mimi05741b",
+  "admin_id": 5778930903070,
+  "victim": {
+    "id": 5789886091550,
+    "email": "mimi05741b+zd1victim@bugcrowdninja.com"
+  },
+  "secret_field_id": 5789858800030,
+  "t_v": 11,
+  "victim_marker_fp": "5bfd8b6e",
+  "_victim_marker": "ZD1VICTIM-03fe4d83",
+  "t_m": 12,
+  "macro_mu": 5789897584030,
+  "baseline_t_v": {
+    "file": "baseline-t-v.json",
+    "count": 1,
+    "ids": [
+      5789858813854
+    ]
+  },
+  "baseline_t_m": {
+    "file": "baseline-t-m.json",
+    "count": 1,
+    "ids": [
+      5789858831262
+    ]
+  }
+}
