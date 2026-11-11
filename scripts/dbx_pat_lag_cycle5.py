@@ -39,7 +39,7 @@ def test(tval, label, t0):
 
 def main():
     s, body = call(OWNER, "POST", "/api/2.0/token/create",
-                   {"comment": "pat-lag-cycle5-retry", "lifetime_seconds": 86400})
+                   {"comment": "pat-lag-cycle5-retry2", "lifetime_seconds": 86400})
     if s != 200:
         print(f"VERDICT CREATE_FAILED status={s} body={body[:200]}", flush=True)
         sys.exit(1)
@@ -48,14 +48,23 @@ def main():
     except Exception:
         print(f"VERDICT CREATE_BAD_JSON body_len={len(body)}", flush=True)
         sys.exit(1)
-    if not isinstance(info, dict) or "token_id" not in info or "token_value" not in info:
+    if not isinstance(info, dict) or "token_value" not in info:
         keys = sorted(info.keys()) if isinstance(info, dict) else type(info).__name__
         err = {}
         if isinstance(info, dict):
             err = {k: str(info.get(k))[:120] for k in ("error_code", "message") if k in info}
         print(f"VERDICT CREATE_SHAPE_MISMATCH keys={keys} error={err}", flush=True)
         sys.exit(1)
-    tid, tval = info["token_id"], info["token_value"]
+    # Databricks create response is NESTED: {"token_value": ..., "token_info": {"token_id": ...}}
+    # (measured 2026-11-11: keys ['token_info', 'token_value']). Accept flat shape too.
+    tval = info["token_value"]
+    ti = info.get("token_info") or {}
+    tid = ti.get("token_id") if isinstance(ti, dict) else None
+    if not tid:
+        tid = info.get("token_id")
+    if not tid:
+        print(f"VERDICT CREATE_SHAPE_MISMATCH keys={sorted(info.keys())} error={{}}", flush=True)
+        sys.exit(1)
     print(f"CREATED token_id_prefix={tid[:12]}", flush=True)
 
     s1, _ = call(tval, "GET", "/api/2.1/clusters/list")
