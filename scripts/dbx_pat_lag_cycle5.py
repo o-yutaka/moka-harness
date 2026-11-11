@@ -39,11 +39,22 @@ def test(tval, label, t0):
 
 def main():
     s, body = call(OWNER, "POST", "/api/2.0/token/create",
-                   {"comment": "pat-lag-cycle5", "lifetime_seconds": 86400})
+                   {"comment": "pat-lag-cycle5-retry", "lifetime_seconds": 86400})
     if s != 200:
         print(f"VERDICT CREATE_FAILED status={s} body={body[:200]}", flush=True)
         sys.exit(1)
-    info = json.loads(body)
+    try:
+        info = json.loads(body)
+    except Exception:
+        print(f"VERDICT CREATE_BAD_JSON body_len={len(body)}", flush=True)
+        sys.exit(1)
+    if not isinstance(info, dict) or "token_id" not in info or "token_value" not in info:
+        keys = sorted(info.keys()) if isinstance(info, dict) else type(info).__name__
+        err = {}
+        if isinstance(info, dict):
+            err = {k: str(info.get(k))[:120] for k in ("error_code", "message") if k in info}
+        print(f"VERDICT CREATE_SHAPE_MISMATCH keys={keys} error={err}", flush=True)
+        sys.exit(1)
     tid, tval = info["token_id"], info["token_value"]
     print(f"CREATED token_id_prefix={tid[:12]}", flush=True)
 
@@ -70,4 +81,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except SystemExit:
+        raise
+    except Exception as e:
+        print(f"VERDICT EXCEPTION {type(e).__name__}: {str(e)[:120]}", flush=True)
+        sys.exit(1)
