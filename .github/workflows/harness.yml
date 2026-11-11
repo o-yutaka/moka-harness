@@ -71,6 +71,8 @@ jobs:
           ZENDESK_EMAIL: mimi05741b+zendesk1@bugcrowdninja.com
           ZD_OUT: outputs/zd
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
           mkdir -p outputs
           python "scripts/${{ inputs.script }}.py" ${{ inputs.args }} 2>&1 | tee "outputs/${{ inputs.script }}.log"
