@@ -74,7 +74,8 @@ jobs:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
-          mkdir -p outputs
+      set -o pipefail
+      mkdir -p outputs
           python "scripts/${{ inputs.script }}.py" ${{ inputs.args }} 2>&1 | tee "outputs/${{ inputs.script }}.log"
       - name: Upload outputs
         if: always()
