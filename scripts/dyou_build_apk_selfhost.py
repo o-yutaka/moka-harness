@@ -1,1 +1,208 @@
-IyEvdXNyL2Jpbi9lbnYgcHl0aG9uMwoiIiJCdWlsZCB0aGUgZC15b3Ugc2FuZGJveCBBUEsgKCsgd2FsbGV0IGJhY2tlbmQgamFyKSBmcm9tIHBpbm5lZCBzb3VyY2UuCgpQdXJwb3NlOiBwcm9kdWNlIHRoZSByZWFsIGFydGlmYWN0cyBzbyBSRUEncyBBbmRyb2lkL0pWTSBsYW5lcyBhbmQKY29tcGFyZS1zb3VyY2UtdG8tYnVuZGxlIGhhdmUgc29tZXRoaW5nIHRvIGJpdGUgb24uIFNvdXJjZS1idWlsZCByb3V0ZQp3YXMgY2xvc2VkIGZvciAqcmVnaXN0cmF0aW9uKiAoZ2F0ZXdheSBjcmVkZW50aWFsIGdhdGUpIOKAlCB0aGlzIGJ1aWxkIGlzCmZvciBzdGF0aWMgYW5hbHlzaXMgb25seS4KClNFTEZIT1NUIFZBUklBTlQ6IHBhdGNoZXMgdGhlIHNhbmRib3ggRW52aXJvbm1lbnRDb25maWdJbXBsIHNlcnZlckhvc3RVUkwgdG8gdGhlCnNlbGYtaG9zdGVkIGJhY2tlbmQgKGh0dHBzOi8vMTAtMC0yLTIubmlwLmlvOjg0NDMpLCB3cml0ZXMgZHVtbXkgbG9jYWwucHJvcGVydGllcwpzZWNyZXRzIGZvciB0aGUgc2VsZi1ob3N0ZWQgc3RhY2ssIGFuZCBidWlsZHMgd2l0aCAtUG1kdm1Ta2lwSW50ZWdyaXR5Q2hlY2tzPWFsbC4KClBpbnMgKGR5b3Uvd29yay9yZXBvcy9QSU5TLm1kLCAyMDI2LTExLTAxKToKICBhbmRyb2lkIDNjYjA1NGJhMjU5OGRhMzMwNjg5MTc5NmI2YTdlMjVjOTdjMzFmNDMgKHN1Ym1vZHVsZXMgcmVjb3JkZWQgaW4gdHJlZSkKICBiYWNrZW5kIDdlMGVkNzM4OWM4YWM5NDRkNjcyM2FjMzlkNzc1ZmNjMTJjN2FiY2QKT3V0cHV0czogQVBLKHMpICsgYmFja2VuZCBqYXIgY29waWVkIHRvIG91dHB1dHMvIHdpdGggc2hhMjU2IGxpbmVzLgoiIiIKaW1wb3J0IGhhc2hsaWIKaW1wb3J0IG9zCmltcG9ydCBzaHV0aWwKaW1wb3J0IHN1YnByb2Nlc3MKaW1wb3J0IHN5cwppbXBvcnQgdGltZQoKQU5EUk9JRF9VUkwgPSAiaHR0cHM6Ly9naXRodWIuY29tL2dlcm1hbi1uYXRpb25hbC13YWxsZXQvZGUtZXVkaS13YWxsZXQtYW5kcm9pZC5naXQiCkFORFJPSURfU0hBID0gIjNjYjA1NGJhMjU5OGRhMzMwNjg5MTc5NmI2YTdlMjVjOTdjMzFmNDMiCkJBQ0tFTkRfVVJMID0gImh0dHBzOi8vZ2l0aHViLmNvbS9nZXJtYW4tbmF0aW9uYWwtd2FsbGV0L2RlLWV1ZGktd2FsbGV0LWJhY2tlbmQuZ2l0IgpCQUNLRU5EX1NIQSA9ICI3ZTBlZDczODljOGFjOTQ0ZDY3MjNhYzM5ZDc3NWZjYzEyYzdhYmNkIgoKUk9PVCA9IG9zLmdldGN3ZCgpCk9VVCA9IG9zLnBhdGguam9pbihST09ULCAib3V0cHV0cyIpCm9zLm1ha2VkaXJzKE9VVCwgZXhpc3Rfb2s9VHJ1ZSkKTE9HID0gb3Blbihvcy5wYXRoLmpvaW4oT1VULCAiZHlvdV9idWlsZC5sb2ciKSwgImEiLCBidWZmZXJpbmc9MSkKCgpkZWYgc2F5KG1zZyk6CiAgICBsaW5lID0gZiJbe3RpbWUuc3RyZnRpbWUoJyVIOiVNOiVTJyl9XSB7bXNnfSIKICAgIHByaW50KGxpbmUsIGZsdXNoPVRydWUpCiAgICBMT0cud3JpdGUobGluZSArICJcbiIpCgoKUlVOX1NFUSA9IFswXQoKCmRlZiBydW4oY21kLCBjd2QsIHRpbWVvdXQ9MzAwMCk6CiAgICBzYXkoZiIkIHsnICcuam9pbihjbWQpfSAgKGN3ZD17Y3dkfSkiKQogICAgcCA9IHN1YnByb2Nlc3MucnVuKGNtZCwgY3dkPWN3ZCwgc3Rkb3V0PXN1YnByb2Nlc3MuUElQRSwKICAgICAgICAgICAgICAgICAgICAgICBzdGRlcnI9c3VicHJvY2Vzcy5TVERPVVQsIHRleHQ9VHJ1ZSwgdGltZW91dD10aW1lb3V0KQogICAgUlVOX1NFUVswXSArPSAxCiAgICBmdWxsID0gb3MucGF0aC5qb2luKE9VVCwgZiJjbWRfe1JVTl9TRVFbMF06MDJkfS5sb2ciKQogICAgd2l0aCBvcGVuKGZ1bGwsICJ3IikgYXMgZmg6CiAgICAgICAgZmgud3JpdGUocC5zdGRvdXQpCiAgICBsaW5lcyA9IHAuc3Rkb3V0LnNwbGl0bGluZXMoKQogICAgaGVhZCA9ICJcbiIuam9pbihsaW5lc1s6MTVdKQogICAgdGFpbCA9ICJcbiIuam9pbihsaW5lc1stMjU6XSkKICAgIExPRy53cml0ZShoZWFkICsgIlxuLi4uW2Z1bGwgb3V0cHV0OiAiICsgb3MucGF0aC5iYXNlbmFtZShmdWxsKSArICJdLi4uXG4iICsgdGFpbCArICJcbiIpCiAgICBwcmludCh0YWlsLCBmbHVzaD1UcnVlKQogICAgc2F5KGYicmM9e3AucmV0dXJuY29kZX0iKQogICAgcmV0dXJuIHAucmV0dXJuY29kZQoKCmRlZiBjbG9uZSh1cmwsIHNoYSwgZGVzdCk6CiAgICByYyA9IHJ1bihbImdpdCIsICJjbG9uZSIsICItLWZpbHRlcj1ibG9iOm5vbmUiLCB1cmwsIGRlc3RdLCBST09ULCB0aW1lb3V0PTEyMDApCiAgICBpZiByYyAhPSAwOgogICAgICAgIHJldHVybiBGYWxzZQogICAgcmMgPSBydW4oWyJnaXQiLCAiY2hlY2tvdXQiLCBzaGFdLCBkZXN0LCB0aW1lb3V0PTYwMCkKICAgIGd3ID0gb3MucGF0aC5qb2luKGRlc3QsICJncmFkbGV3IikKICAgIGlmIG9zLnBhdGguZXhpc3RzKGd3KToKICAgICAgICBvcy5jaG1vZChndywgMG83NTUpCiAgICByZXR1cm4gcmMgPT0gMAoKCiMgVGhlIE9TUyBzeW5jIHN0cmlwcyBzdWJtb2R1bGUgZ2l0bGlua3M6IC5naXRtb2R1bGVzIGV4aXN0cyBidXQgdGhlIHRyZWUgaGFzCiMgbm8gY29yZS8gb3Igb3BlbmlkNHZjaS8gZW50cmllcywgc28gYGdpdCBzdWJtb2R1bGUgdXBkYXRlYCBpcyBhIG5vLW9wLgojIFBvcHVsYXRlIGJvdGggbGlicmFyeSBjaGVja291dHMgbWFudWFsbHkgYXQgdGhlIC5naXRtb2R1bGVzIGJyYW5jaGVzLgpMSUJfQ0hFQ0tPVVRTID0gWwogICAgKCJjb3JlIiwgImh0dHBzOi8vZ2l0aHViLmNvbS9nZXJtYW4tbmF0aW9uYWwtd2FsbGV0L2V1ZGktbGliLWFuZHJvaWQtd2FsbGV0LWNvcmUiLAogICAgICJkZXZlbG9wLTAuMzAuMiIsICJkb2N1bWVudC1tYW5hZ2VyIiksCiAgICAoIm9wZW5pZDR2Y2kiLCAiaHR0cHM6Ly9naXRodWIuY29tL2dlcm1hbi1uYXRpb25hbC13YWxsZXQvZXVkaS1saWItanZtLW9wZW5pZDR2Y2kta3QiLAogICAgICJkZXZlbG9wLTAuMTQuMCIsIE5vbmUpLApdCgoKZGVmIHBvcHVsYXRlX2xpYnMoZGVzdCk6CiAgICBmb3Igc3ViLCB1cmwsIGJyYW5jaCwgbWFya2VyIGluIExJQl9DSEVDS09VVFM6CiAgICAgICAgdGFyZ2V0ID0gb3MucGF0aC5qb2luKGRlc3QsIHN1YikKICAgICAgICBwcm9iZSA9IG9zLnBhdGguam9pbih0YXJnZXQsIG1hcmtlcikgaWYgbWFya2VyIGVsc2UgdGFyZ2V0CiAgICAgICAgaWYgb3MucGF0aC5leGlzdHMocHJvYmUpOgogICAgICAgICAgICBzYXkoZiJsaWIge3N1Yn06IGFscmVhZHkgcHJlc2VudCIpCiAgICAgICAgICAgIGNvbnRpbnVlCiAgICAgICAgaWYgb3MucGF0aC5pc2Rpcih0YXJnZXQpOgogICAgICAgICAgICBzaHV0aWwucm10cmVlKHRhcmdldCkKICAgICAgICByYyA9IHJ1bihbImdpdCIsICJjbG9uZSIsICItLWJyYW5jaCIsIGJyYW5jaCwgdXJsLCB0YXJnZXRdLCBST09ULCB0aW1lb3V0PTEyMDApCiAgICAgICAgc2F5KGYibGliIHtzdWJ9OiBjbG9uZSByYz17cmN9IG1hcmtlcl9leGlzdHM9e29zLnBhdGguZXhpc3RzKHByb2JlKX0iKQoKClNFTEZIT1NUX1VSTCA9ICJodHRwczovLzEwLTAtMi0yLm5pcC5pbzo4NDQzIgoKCmRlZiBwYXRjaF9zZWxmaG9zdChkZXN0KToKICAgIGNmZyA9IG9zLnBhdGguam9pbihkZXN0LCAiYnVzaW5lc3MtbG9naWMiLCAic3JjIiwgInNhbmRib3giLCAiamF2YSIsCiAgICAgICAgICAgICAgICAgICAgICAgIm9yZyIsICJzcHJpbmQiLCAid2FsbGV0IiwgImJ1c2luZXNzbG9naWMiLCAiY29uZmlnIiwKICAgICAgICAgICAgICAgICAgICAgICAiRW52aXJvbm1lbnRDb25maWdJbXBsLmt0IikKICAgIHdpdGggb3BlbihjZmcpIGFzIGZoOgogICAgICAgIGJvZHkgPSBmaC5yZWFkKCkKICAgIG9sZCA9ICJodHRwczovL3NhbmRib3gud2FsbGV0LWJhY2tlbmQuZXhhbXBsZS5pbnZhbGlkIgogICAgYXNzZXJ0IG9sZCBpbiBib2R5LCAicGxhY2Vob2xkZXIgVVJMIG5vdCBmb3VuZCBpbiBFbnZpcm9ubWVudENvbmZpZ0ltcGwua3QiCiAgICBib2R5ID0gYm9keS5yZXBsYWNlKG9sZCwgU0VMRkhPU1RfVVJMKQogICAgd2l0aCBvcGVuKGNmZywgInciKSBhcyBmaDoKICAgICAgICBmaC53cml0ZShib2R5KQogICAgc2F5KGYic2VsZmhvc3QgcGF0Y2g6IHNlcnZlckhvc3RVUkwgLT4ge1NFTEZIT1NUX1VSTH0iKQogICAgbHAgPSBvcy5wYXRoLmpvaW4oZGVzdCwgImxvY2FsLnByb3BlcnRpZXMiKQogICAgd2l0aCBvcGVuKGxwLCAidyIpIGFzIGZoOgogICAgICAgIGZoLndyaXRlKCJXQUxMRVRfQVVUSF9UT0tFTj0iICsgInNlbGZob3N0LWR1bW15LXRva2VuIiArIGNocigxMCkpCiAgICAgICAgZmgud3JpdGUoIk9URUxfV0FMTEVUX0FVVEhfVE9LRU49IiArICJzZWxmaG9zdC1kdW1teS10b2tlbiIgKyBjaHIoMTApKQogICAgICAgIGZoLndyaXRlKCJGRUFUVVJFX0ZMQUdfQVBJX1RPS0VOPSIgKyAic2VsZmhvc3QtZHVtbXktdG9rZW4iICsgY2hyKDEwKSkKICAgICAgICBmaC53cml0ZSgiVkNJX0lTU1VFUl9DTElFTlRfSUQ9c2VsZmhvc3QtY2xpZW50IiArIGNocigxMCkpCiAgICBzYXkoInNlbGZob3N0IHBhdGNoOiBsb2NhbC5wcm9wZXJ0aWVzIHdyaXR0ZW4gKGR1bW15IHZhbHVlcyBmb3Igb3duIHN0YWNrKSIpCgoKZGVmIHNoYTI1NihwYXRoKToKICAgIGggPSBoYXNobGliLnNoYTI1NigpCiAgICB3aXRoIG9wZW4ocGF0aCwgInJiIikgYXMgZjoKICAgICAgICBmb3IgY2h1bmsgaW4gaXRlcihsYW1iZGE6IGYucmVhZCgxIDw8IDIwKSwgYiIiKToKICAgICAgICAgICAgaC51cGRhdGUoY2h1bmspCiAgICByZXR1cm4gaC5oZXhkaWdlc3QoKQoKCmRlZiBzaGlwKHBhdGgsIHRhZyk6CiAgICBkc3QgPSBvcy5wYXRoLmpvaW4oT1VULCBvcy5wYXRoLmJhc2VuYW1lKHBhdGgpKQogICAgc2h1dGlsLmNvcHkyKHBhdGgsIGRzdCkKICAgIHNheShmIkFSVElGQUNUIHt0YWd9OiB7ZHN0fSBzaXplPXtvcy5wYXRoLmdldHNpemUoZHN0KX0gc2hhMjU2PXtzaGEyNTYoZHN0KX0iKQoKCmRlZiBidWlsZF9hbmRyb2lkKCk6CiAgICBkZXN0ID0gb3MucGF0aC5qb2luKFJPT1QsICJkZS1ldWRpLXdhbGxldC1hbmRyb2lkIikKICAgIGlmIG5vdCBjbG9uZShBTkRST0lEX1VSTCwgQU5EUk9JRF9TSEEsIGRlc3QpOgogICAgICAgIHNheSgiVkVSRElDVF9BUEs6IENMT05FX0ZBSUwiKQogICAgICAgIHJldHVybgogICAgcnVuKFsiZ2l0IiwgInN1Ym1vZHVsZSIsICJ1cGRhdGUiLCAiLS1pbml0IiwgIi0tcmVjdXJzaXZlIl0sIGRlc3QsIHRpbWVvdXQ9MTIwMCkKICAgIHBvcHVsYXRlX2xpYnMoZGVzdCkKICAgIHBhdGNoX3NlbGZob3N0KGRlc3QpCiAgICBzZGsgPSBvcy5lbnZpcm9uLmdldCgiQU5EUk9JRF9IT01FIikgb3Igb3MuZW52aXJvbi5nZXQoIkFORFJPSURfU0RLX1JPT1QiKSBvciAiIgogICAgc2RrbWFuYWdlciA9IG9zLnBhdGguam9pbihzZGssICJjbWRsaW5lLXRvb2xzIiwgImxhdGVzdCIsICJiaW4iLCAic2RrbWFuYWdlciIpCiAgICBpZiBvcy5wYXRoLmV4aXN0cyhzZGttYW5hZ2VyKToKICAgICAgICB0cnk6CiAgICAgICAgICAgIHAgPSBzdWJwcm9jZXNzLnJ1bihbc2RrbWFuYWdlciwgIi0tbGljZW5zZXMiXSwgaW5wdXQ9InlcbiIgKiAzMCwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNhcHR1cmVfb3V0cHV0PVRydWUsIHRleHQ9VHJ1ZSwgdGltZW91dD0zMDApCiAgICAgICAgICAgIHNheShmImxpY2Vuc2VzIHJjPXtwLnJldHVybmNvZGV9IikKICAgICAgICBleGNlcHQgRXhjZXB0aW9uIGFzIGU6ICAjIG5vcWE6IEJMRTAwMQogICAgICAgICAgICBzYXkoZiJsaWNlbnNlcyBzdGVwIHNraXBwZWQ6IHtlfSIpCiAgICByYyA9IHJ1bihbIi4vZ3JhZGxldyIsICI6YXBwOmFzc2VtYmxlU2FuZGJveERlYnVnIiwgIi1QbWR2bVNraXBJbnRlZ3JpdHlDaGVja3M9YWxsIiwgIi0tc3RhY2t0cmFjZSIsICItLW5vLWRhZW1vbiJdLAogICAgICAgICAgICAgZGVzdCwgdGltZW91dD0zMDAwKQogICAgaWYgcmMgIT0gMDoKICAgICAgICBzYXkoImFzc2VtYmxlU2FuZGJveERlYnVnIGZhaWxlZCwgZmFsbGluZyBiYWNrIHRvIGFzc2VtYmxlRGVidWciKQogICAgICAgIHJjID0gcnVuKFsiLi9ncmFkbGV3IiwgIjphcHA6YXNzZW1ibGVEZWJ1ZyIsICItLXN0YWNrdHJhY2UiLCAiLS1uby1kYWVtb24iXSwKICAgICAgICAgICAgICAgICBkZXN0LCB0aW1lb3V0PTMwMDApCiAgICBhcGtzID0gW10KICAgIGZvciBiYXNlLCBfZGlycywgZmlsZXMgaW4gb3Mud2Fsayhvcy5wYXRoLmpvaW4oZGVzdCwgImFwcCIsICJidWlsZCIsICJvdXRwdXRzIiwgImFwayIpKToKICAgICAgICBmb3IgZiBpbiBmaWxlczoKICAgICAgICAgICAgaWYgZi5lbmRzd2l0aCgiLmFwayIpOgogICAgICAgICAgICAgICAgYXBrcy5hcHBlbmQob3MucGF0aC5qb2luKGJhc2UsIGYpKQogICAgaWYgbm90IGFwa3M6CiAgICAgICAgc2F5KCJWRVJESUNUX0FQSzogTk9fQVBLX1BST0RVQ0VEIikKICAgICAgICByZXR1cm4KICAgIGZvciBhIGluIHNvcnRlZChhcGtzKToKICAgICAgICBzaGlwKGEsICJBUEsiKQogICAgc2F5KGYiVkVSRElDVF9BUEs6IE9LIGNvdW50PXtsZW4oYXBrcyl9IikKCgpkZWYgYnVpbGRfYmFja2VuZCgpOgogICAgZGVzdCA9IG9zLnBhdGguam9pbihST09ULCAiZGUtZXVkaS13YWxsZXQtYmFja2VuZCIpCiAgICBpZiBub3QgY2xvbmUoQkFDS0VORF9VUkwsIEJBQ0tFTkRfU0hBLCBkZXN0KToKICAgICAgICBzYXkoIlZFUkRJQ1RfQkFDS0VORDogQ0xPTkVfRkFJTCIpCiAgICAgICAgcmV0dXJuCiAgICByYyA9IHJ1bihbIi4vZ3JhZGxldyIsICJib290SmFyIiwgIi0tc3RhY2t0cmFjZSIsICItLW5vLWRhZW1vbiJdLCBkZXN0LCB0aW1lb3V0PTMwMDApCiAgICBqYXJzID0gW10KICAgIGxpYmRpciA9IG9zLnBhdGguam9pbihkZXN0LCAiYnVpbGQiLCAibGlicyIpCiAgICBpZiBvcy5wYXRoLmlzZGlyKGxpYmRpcik6CiAgICAgICAgZm9yIGYgaW4gb3MubGlzdGRpcihsaWJkaXIpOgogICAgICAgICAgICBpZiBmLmVuZHN3aXRoKCIuamFyIik6CiAgICAgICAgICAgICAgICBqYXJzLmFwcGVuZChvcy5wYXRoLmpvaW4obGliZGlyLCBmKSkKICAgIGlmIHJjICE9IDAgb3Igbm90IGphcnM6CiAgICAgICAgc2F5KGYiVkVSRElDVF9CQUNLRU5EOiBOT19KQVIgcmM9e3JjfSIpCiAgICAgICAgcmV0dXJuCiAgICBmb3IgaiBpbiBzb3J0ZWQoamFycyk6CiAgICAgICAgc2hpcChqLCAiQkFDS0VORF9KQVIiKQogICAgc2F5KGYiVkVSRElDVF9CQUNLRU5EOiBPSyBjb3VudD17bGVuKGphcnMpfSIpCgoKZGVmIG1haW4oKToKICAgIG1vZGUgPSBzeXMuYXJndlsxXSBpZiBsZW4oc3lzLmFyZ3YpID4gMSBlbHNlICJhbGwiCiAgICBzYXkoZiJkeW91X2J1aWxkX2FwayBzdGFydCBtb2RlPXttb2RlfSIpCiAgICBpZiBtb2RlIGluICgiYWxsIiwgImFwayIpOgogICAgICAgIHRyeToKICAgICAgICAgICAgYnVpbGRfYW5kcm9pZCgpCiAgICAgICAgZXhjZXB0IEV4Y2VwdGlvbiBhcyBlOiAgIyBub3FhOiBCTEUwMDEKICAgICAgICAgICAgc2F5KGYiVkVSRElDVF9BUEs6IEVYQ0VQVElPTiB7ZX0iKQogICAgaWYgbW9kZSBpbiAoImFsbCIsICJiYWNrZW5kIik6CiAgICAgICAgdHJ5OgogICAgICAgICAgICBidWlsZF9iYWNrZW5kKCkKICAgICAgICBleGNlcHQgRXhjZXB0aW9uIGFzIGU6ICAjIG5vcWE6IEJMRTAwMQogICAgICAgICAgICBzYXkoZiJWRVJESUNUX0JBQ0tFTkQ6IEVYQ0VQVElPTiB7ZX0iKQogICAgc2F5KCJkeW91X2J1aWxkX2FwayBkb25lIikKCgppZiBfX25hbWVfXyA9PSAiX19tYWluX18iOgogICAgbWFpbigpCg==
+#!/usr/bin/env python3
+"""Build the d-you sandbox APK (+ wallet backend jar) from pinned source.
+
+Purpose: produce the real artifacts so REA's Android/JVM lanes and
+compare-source-to-bundle have something to bite on. Source-build route
+was closed for *registration* (gateway credential gate) — this build is
+for static analysis only.
+
+SELFHOST VARIANT: patches the sandbox EnvironmentConfigImpl serverHostURL to the
+self-hosted backend (https://10-0-2-2.nip.io:8443), writes dummy local.properties
+secrets for the self-hosted stack, and builds with -PmdvmSkipIntegrityChecks=all.
+
+Pins (dyou/work/repos/PINS.md, 2026-11-01):
+  android 3cb054ba2598da3306891796b6a7e25c97c31f43 (submodules recorded in tree)
+  backend 7e0ed7389c8ac944d6723ac39d775fcc12c7abcd
+Outputs: APK(s) + backend jar copied to outputs/ with sha256 lines.
+"""
+import hashlib
+import os
+import shutil
+import subprocess
+import sys
+import time
+
+ANDROID_URL = "https://github.com/german-national-wallet/de-eudi-wallet-android.git"
+ANDROID_SHA = "3cb054ba2598da3306891796b6a7e25c97c31f43"
+BACKEND_URL = "https://github.com/german-national-wallet/de-eudi-wallet-backend.git"
+BACKEND_SHA = "7e0ed7389c8ac944d6723ac39d775fcc12c7abcd"
+
+ROOT = os.getcwd()
+OUT = os.path.join(ROOT, "outputs")
+os.makedirs(OUT, exist_ok=True)
+LOG = open(os.path.join(OUT, "dyou_build.log"), "a", buffering=1)
+
+
+def say(msg):
+    line = f"[{time.strftime('%H:%M:%S')}] {msg}"
+    print(line, flush=True)
+    LOG.write(line + "\n")
+
+
+RUN_SEQ = [0]
+
+
+def run(cmd, cwd, timeout=3000):
+    say(f"$ {' '.join(cmd)}  (cwd={cwd})")
+    p = subprocess.run(cmd, cwd=cwd, stdout=subprocess.PIPE,
+                       stderr=subprocess.STDOUT, text=True, timeout=timeout)
+    RUN_SEQ[0] += 1
+    full = os.path.join(OUT, f"cmd_{RUN_SEQ[0]:02d}.log")
+    with open(full, "w") as fh:
+        fh.write(p.stdout)
+    lines = p.stdout.splitlines()
+    head = "\n".join(lines[:15])
+    tail = "\n".join(lines[-25:])
+    LOG.write(head + "\n...[full output: " + os.path.basename(full) + "]...\n" + tail + "\n")
+    print(tail, flush=True)
+    say(f"rc={p.returncode}")
+    return p.returncode
+
+
+def clone(url, sha, dest):
+    rc = run(["git", "clone", "--filter=blob:none", url, dest], ROOT, timeout=1200)
+    if rc != 0:
+        return False
+    rc = run(["git", "checkout", sha], dest, timeout=600)
+    gw = os.path.join(dest, "gradlew")
+    if os.path.exists(gw):
+        os.chmod(gw, 0o755)
+    return rc == 0
+
+
+# The OSS sync strips submodule gitlinks: .gitmodules exists but the tree has
+# no core/ or openid4vci/ entries, so `git submodule update` is a no-op.
+# Populate both library checkouts manually at the .gitmodules branches.
+LIB_CHECKOUTS = [
+    ("core", "https://github.com/german-national-wallet/eudi-lib-android-wallet-core",
+     "develop-0.30.2", "document-manager"),
+    ("openid4vci", "https://github.com/german-national-wallet/eudi-lib-jvm-openid4vci-kt",
+     "develop-0.14.0", None),
+]
+
+
+def populate_libs(dest):
+    for sub, url, branch, marker in LIB_CHECKOUTS:
+        target = os.path.join(dest, sub)
+        probe = os.path.join(target, marker) if marker else target
+        if os.path.exists(probe):
+            say(f"lib {sub}: already present")
+            continue
+        if os.path.isdir(target):
+            shutil.rmtree(target)
+        rc = run(["git", "clone", "--branch", branch, url, target], ROOT, timeout=1200)
+        say(f"lib {sub}: clone rc={rc} marker_exists={os.path.exists(probe)}")
+
+
+SELFHOST_URL = "https://10-0-2-2.nip.io:8443"
+
+
+def patch_selfhost(dest):
+    cfg = os.path.join(dest, "business-logic", "src", "sandbox", "java",
+                       "org", "sprind", "wallet", "businesslogic", "config",
+                       "EnvironmentConfigImpl.kt")
+    with open(cfg) as fh:
+        body = fh.read()
+    old = "https://sandbox.wallet-backend.example.invalid"
+    assert old in body, "placeholder URL not found in EnvironmentConfigImpl.kt"
+    body = body.replace(old, SELFHOST_URL)
+    with open(cfg, "w") as fh:
+        fh.write(body)
+    say(f"selfhost patch: serverHostURL -> {SELFHOST_URL}")
+    lp = os.path.join(dest, "local.properties")
+    with open(lp, "w") as fh:
+        fh.write("WALLET_AUTH_TOKEN=" + "selfhost-dummy-token" + chr(10))
+        fh.write("OTEL_WALLET_AUTH_TOKEN=" + "selfhost-dummy-token" + chr(10))
+        fh.write("FEATURE_FLAG_API_TOKEN=" + "selfhost-dummy-token" + chr(10))
+        fh.write("VCI_ISSUER_CLIENT_ID=selfhost-client" + chr(10))
+    say("selfhost patch: local.properties written (dummy values for own stack)")
+
+
+def sha256(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def ship(path, tag):
+    dst = os.path.join(OUT, os.path.basename(path))
+    shutil.copy2(path, dst)
+    say(f"ARTIFACT {tag}: {dst} size={os.path.getsize(dst)} sha256={sha256(dst)}")
+
+
+def build_android():
+    dest = os.path.join(ROOT, "de-eudi-wallet-android")
+    if not clone(ANDROID_URL, ANDROID_SHA, dest):
+        say("VERDICT_APK: CLONE_FAIL")
+        return
+    run(["git", "submodule", "update", "--init", "--recursive"], dest, timeout=1200)
+    populate_libs(dest)
+    patch_selfhost(dest)
+    sdk = os.environ.get("ANDROID_HOME") or os.environ.get("ANDROID_SDK_ROOT") or ""
+    sdkmanager = os.path.join(sdk, "cmdline-tools", "latest", "bin", "sdkmanager")
+    if os.path.exists(sdkmanager):
+        try:
+            p = subprocess.run([sdkmanager, "--licenses"], input="y\n" * 30,
+                               capture_output=True, text=True, timeout=300)
+            say(f"licenses rc={p.returncode}")
+        except Exception as e:  # noqa: BLE001
+            say(f"licenses step skipped: {e}")
+    rc = run(["./gradlew", ":app:assembleSandboxDebug", "-PmdvmSkipIntegrityChecks=all", "--stacktrace", "--no-daemon"],
+             dest, timeout=3000)
+    if rc != 0:
+        say("assembleSandboxDebug failed, falling back to assembleDebug")
+        rc = run(["./gradlew", ":app:assembleDebug", "--stacktrace", "--no-daemon"],
+                 dest, timeout=3000)
+    apks = []
+    for base, _dirs, files in os.walk(os.path.join(dest, "app", "build", "outputs", "apk")):
+        for f in files:
+            if f.endswith(".apk"):
+                apks.append(os.path.join(base, f))
+    if not apks:
+        say("VERDICT_APK: NO_APK_PRODUCED")
+        return
+    for a in sorted(apks):
+        ship(a, "APK")
+    say(f"VERDICT_APK: OK count={len(apks)}")
+
+
+def build_backend():
+    dest = os.path.join(ROOT, "de-eudi-wallet-backend")
+    if not clone(BACKEND_URL, BACKEND_SHA, dest):
+        say("VERDICT_BACKEND: CLONE_FAIL")
+        return
+    rc = run(["./gradlew", "bootJar", "--stacktrace", "--no-daemon"], dest, timeout=3000)
+    jars = []
+    libdir = os.path.join(dest, "build", "libs")
+    if os.path.isdir(libdir):
+        for f in os.listdir(libdir):
+            if f.endswith(".jar"):
+                jars.append(os.path.join(libdir, f))
+    if rc != 0 or not jars:
+        say(f"VERDICT_BACKEND: NO_JAR rc={rc}")
+        return
+    for j in sorted(jars):
+        ship(j, "BACKEND_JAR")
+    say(f"VERDICT_BACKEND: OK count={len(jars)}")
+
+
+def main():
+    mode = sys.argv[1] if len(sys.argv) > 1 else "all"
+    say(f"dyou_build_apk start mode={mode}")
+    if mode in ("all", "apk"):
+        try:
+            build_android()
+        except Exception as e:  # noqa: BLE001
+            say(f"VERDICT_APK: EXCEPTION {e}")
+    if mode in ("all", "backend"):
+        try:
+            build_backend()
+        except Exception as e:  # noqa: BLE001
+            say(f"VERDICT_BACKEND: EXCEPTION {e}")
+    say("dyou_build_apk done")
+
+
+if __name__ == "__main__":
+    main()
