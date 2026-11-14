@@ -35,12 +35,21 @@ def say(msg):
     LOG.write(line + "\n")
 
 
+RUN_SEQ = [0]
+
+
 def run(cmd, cwd, timeout=3000):
     say(f"$ {' '.join(cmd)}  (cwd={cwd})")
     p = subprocess.run(cmd, cwd=cwd, stdout=subprocess.PIPE,
                        stderr=subprocess.STDOUT, text=True, timeout=timeout)
-    tail = "\n".join(p.stdout.splitlines()[-25:])
-    LOG.write(tail + "\n")
+    RUN_SEQ[0] += 1
+    full = os.path.join(OUT, f"cmd_{RUN_SEQ[0]:02d}.log")
+    with open(full, "w") as fh:
+        fh.write(p.stdout)
+    lines = p.stdout.splitlines()
+    head = "\n".join(lines[:15])
+    tail = "\n".join(lines[-25:])
+    LOG.write(head + "\n...[full output: " + os.path.basename(full) + "]...\n" + tail + "\n")
     print(tail, flush=True)
     say(f"rc={p.returncode}")
     return p.returncode
