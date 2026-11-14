@@ -34,6 +34,7 @@ def run(cmd, timeout=300, inp=None, echo=True):
         out = (p.stdout or "") + (p.stderr or "")
         if echo:
             print(out[-4000:], flush=True)
+            print(f"[rc={p.returncode}]", flush=True)
         return p.returncode, out
     except subprocess.TimeoutExpired as e:
         print(f"TIMEOUT after {timeout}s: {cmd}", flush=True)
@@ -61,8 +62,14 @@ def main():
     run(f'yes | "{SDKM}" --licenses > /dev/null 2>&1; "{SDKM}" "platform-tools" "emulator" "platforms;android-35" "{SYSIMG}"', timeout=1800)
     run("df -h / | tail -1")
 
-    # AVD
-    run(f'echo no | "{AVDM}" create avd -n emu -k "{SYSIMG}" -d pixel_6 --force', timeout=180)
+    # AVD (run 1020 lesson: -d pixel_6 silently aborted creation; drop the device
+    # flag, save the full avdmanager output, and verify emu.ini actually exists)
+    rc, avd_out = run(f'echo no | "{AVDM}" create avd -n emu -k "{SYSIMG}" --force', timeout=180)
+    save("avdmanager.log", avd_out)
+    avd_ini = os.path.expanduser("~/.android/avd/emu.ini")
+    print(f"AVD_INI_EXISTS: {os.path.exists(avd_ini)}", flush=True)
+    if not os.path.exists(avd_ini):
+        run("ls -la ~/.android/avd/ 2>&1; find / -name 'emu.ini' -not -path '/proc/*' 2>/dev/null | head -5; echo ---; tail -30 outputs/avdmanager.log")
     run(f'"{EMU}" -list-avds')
 
     # Boot
