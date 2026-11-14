@@ -51,6 +51,9 @@ def clone(url, sha, dest):
     if rc != 0:
         return False
     rc = run(["git", "checkout", sha], dest, timeout=600)
+    gw = os.path.join(dest, "gradlew")
+    if os.path.exists(gw):
+        os.chmod(gw, 0o755)
     return rc == 0
 
 
@@ -123,15 +126,18 @@ def build_backend():
 
 
 def main():
-    say("dyou_build_apk start")
-    try:
-        build_android()
-    except Exception as e:  # noqa: BLE001
-        say(f"VERDICT_APK: EXCEPTION {e}")
-    try:
-        build_backend()
-    except Exception as e:  # noqa: BLE001
-        say(f"VERDICT_BACKEND: EXCEPTION {e}")
+    mode = sys.argv[1] if len(sys.argv) > 1 else "all"
+    say(f"dyou_build_apk start mode={mode}")
+    if mode in ("all", "apk"):
+        try:
+            build_android()
+        except Exception as e:  # noqa: BLE001
+            say(f"VERDICT_APK: EXCEPTION {e}")
+    if mode in ("all", "backend"):
+        try:
+            build_backend()
+        except Exception as e:  # noqa: BLE001
+            say(f"VERDICT_BACKEND: EXCEPTION {e}")
     say("dyou_build_apk done")
 
 
