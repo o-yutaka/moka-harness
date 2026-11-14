@@ -118,6 +118,39 @@ def patch_selfhost(dest):
     say("selfhost patch: local.properties written (dummy values for own stack)")
 
 
+NSC_XML = """<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
+"""
+
+
+def patch_network_config(dest):
+    # The sandbox network_security_config.xml ships with <trust-anchors> placed
+    # OUTSIDE <base-config>, where Android ignores it, so the effective anchors
+    # are system-only and the self-hosted backend's user-installed CA fails with
+    # CertPathValidatorException ("Trust anchor for certification path not
+    # found", app log 2026-11-15). Rewrite both copies in the corrected form
+    # (the sandbox file is the one that should win for the sandbox flavor;
+    # patching main too removes any doubt about resource merging).
+    for rel in [os.path.join("network-logic", "src", "sandbox", "res", "xml",
+                             "network_security_config.xml"),
+                os.path.join("network-logic", "src", "main", "res", "xml",
+                             "network_security_config.xml")]:
+        p = os.path.join(dest, rel)
+        if os.path.exists(p):
+            with open(p, "w") as fh:
+                fh.write(NSC_XML)
+            say(f"selfhost patch: network_security_config fixed at {rel}")
+        else:
+            say(f"selfhost patch: network_security_config NOT FOUND at {rel}")
+
+
 def sha256(path):
     h = hashlib.sha256()
     with open(path, "rb") as f:
@@ -140,6 +173,7 @@ def build_android():
     run(["git", "submodule", "update", "--init", "--recursive"], dest, timeout=1200)
     populate_libs(dest)
     patch_selfhost(dest)
+    patch_network_config(dest)
     sdk = os.environ.get("ANDROID_HOME") or os.environ.get("ANDROID_SDK_ROOT") or ""
     sdkmanager = os.path.join(sdk, "cmdline-tools", "latest", "bin", "sdkmanager")
     if os.path.exists(sdkmanager):
