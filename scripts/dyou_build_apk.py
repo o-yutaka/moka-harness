@@ -66,6 +66,30 @@ def clone(url, sha, dest):
     return rc == 0
 
 
+# The OSS sync strips submodule gitlinks: .gitmodules exists but the tree has
+# no core/ or openid4vci/ entries, so `git submodule update` is a no-op.
+# Populate both library checkouts manually at the .gitmodules branches.
+LIB_CHECKOUTS = [
+    ("core", "https://github.com/german-national-wallet/eudi-lib-android-wallet-core",
+     "develop-0.30.2", "document-manager"),
+    ("openid4vci", "https://github.com/german-national-wallet/eudi-lib-jvm-openid4vci-kt",
+     "develop-0.14.0", None),
+]
+
+
+def populate_libs(dest):
+    for sub, url, branch, marker in LIB_CHECKOUTS:
+        target = os.path.join(dest, sub)
+        probe = os.path.join(target, marker) if marker else target
+        if os.path.exists(probe):
+            say(f"lib {sub}: already present")
+            continue
+        if os.path.isdir(target):
+            shutil.rmtree(target)
+        rc = run(["git", "clone", "--branch", branch, url, target], ROOT, timeout=1200)
+        say(f"lib {sub}: clone rc={rc} marker_exists={os.path.exists(probe)}")
+
+
 def sha256(path):
     h = hashlib.sha256()
     with open(path, "rb") as f:
@@ -86,6 +110,7 @@ def build_android():
         say("VERDICT_APK: CLONE_FAIL")
         return
     run(["git", "submodule", "update", "--init", "--recursive"], dest, timeout=1200)
+    populate_libs(dest)
     sdk = os.environ.get("ANDROID_HOME") or os.environ.get("ANDROID_SDK_ROOT") or ""
     sdkmanager = os.path.join(sdk, "cmdline-tools", "latest", "bin", "sdkmanager")
     if os.path.exists(sdkmanager):
