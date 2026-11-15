@@ -183,11 +183,11 @@ def build_android():
             say(f"licenses rc={p.returncode}")
         except Exception as e:  # noqa: BLE001
             say(f"licenses step skipped: {e}")
-    rc = run(["./gradlew", ":app:assembleSandboxDebug", "-PmdvmSkipIntegrityChecks=all", "--stacktrace", "--no-daemon"],
+    rc = run(["./gradlew", ":app:assembleSandboxDebug", "-PmdvmSkipIntegrityChecks=all", "-PenableSoftwareKeys=true", "--stacktrace", "--no-daemon"],
              dest, timeout=3000)
     if rc != 0:
         say("assembleSandboxDebug failed, falling back to assembleDebug")
-        rc = run(["./gradlew", ":app:assembleDebug", "--stacktrace", "--no-daemon"],
+        rc = run(["./gradlew", ":app:assembleDebug", "-PmdvmSkipIntegrityChecks=all", "-PenableSoftwareKeys=true", "--stacktrace", "--no-daemon"],
                  dest, timeout=3000)
     apks = []
     for base, _dirs, files in os.walk(os.path.join(dest, "app", "build", "outputs", "apk")):
